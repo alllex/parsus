@@ -4,8 +4,8 @@ plugins {
     kotlin("jvm") version "1.4.32"
 }
 
-group = "me.alllex"
-version = "0.1.1-SNAPSHOT"
+group = "me.alllex.parsus"
+version = "0.1.1"
 
 dependencies {
     testImplementation(kotlin("test-junit"))
