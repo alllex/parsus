@@ -2,10 +2,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.4.32"
+    `maven-publish`
 }
 
-group = "me.alllex.parsus"
-version = "0.1.1"
+group = "com.github.alllex"
+version = "0.1.2"
 
 dependencies {
     testImplementation(kotlin("test-junit"))
@@ -18,4 +19,18 @@ repositories {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "${JavaVersion.VERSION_1_8}"
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            artifact(sourcesJar.get())
+        }
+    }
 }
