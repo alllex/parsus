@@ -5,7 +5,7 @@ import me.alllex.parsus.token.token
 import me.alllex.parsus.parser.*
 
 
-class FasterJsonGrammar : Grammar<Json>() {
+object FasterJsonGrammar : Grammar<Json>() {
 
     @Suppress("unused")
     private val whiteSpace by token(ignored = true, firstChars = " \n\t") { it, at ->
@@ -82,7 +82,7 @@ fun main() {
             "v5": { "such": ["json"] }
         }
     """.trimIndent()
-    val json = FasterJsonGrammar().parseToEnd(input)
+    val json = FasterJsonGrammar.parseToEnd(input)
     printJson(json)
 }
 

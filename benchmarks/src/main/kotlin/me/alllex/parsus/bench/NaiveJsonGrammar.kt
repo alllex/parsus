@@ -5,7 +5,7 @@ import me.alllex.parsus.token.regexToken
 import me.alllex.parsus.parser.*
 
 
-class NaiveJsonGrammar : Grammar<Json>() {
+object NaiveJsonGrammar : Grammar<Json>() {
     init { register(regexToken("\\s+", ignored = true)) }
     private val comma by literalToken(",")
     private val colon by literalToken(":")
@@ -44,7 +44,7 @@ fun main() {
             "v5": { "such": ["json"] }
         }
     """.trimIndent()
-    val json = NaiveJsonGrammar().parseToEnd(input)
+    val json = NaiveJsonGrammar.parseToEnd(input)
     printJson(json)
 }
 
