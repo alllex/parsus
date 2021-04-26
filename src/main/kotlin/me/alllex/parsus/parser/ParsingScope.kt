@@ -1,7 +1,7 @@
 package me.alllex.parsus.parser
 
 import me.alllex.parsus.token.Token
-import me.alllex.parsus.token.TokenMatch
+import me.alllex.parsus.token.TokenMatcher
 import kotlin.coroutines.RestrictsSuspension
 
 /**
@@ -18,9 +18,9 @@ interface ParsingScope {
     suspend operator fun <R> Parser<R>.invoke(): R
 
     /**
-     * Tries to parse given [token] at the current position in the input.
+     * Tries to parse given [grammar token][token] at the current position in the input.
      */
-    fun rawToken(token: Token): ParseResult<TokenMatch>
+    fun <T : TokenMatcher> rawToken(token: Token<T>): ParseResult<TokenMatch<T>>
 
     /**
      * Runs the parser, returning wrapped result.
@@ -44,7 +44,7 @@ interface ParsingScope {
     /**
      * Extracts the text corresponding to the token match from the input.
      */
-    val TokenMatch.text: String
+    val TokenMatch<*>.text: String
 
     suspend operator fun Parser<*>.unaryMinus(): IgnoredValue = ignoring(this)
 

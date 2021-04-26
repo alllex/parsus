@@ -1,7 +1,6 @@
 package me.alllex.parsus.parser
 
 import me.alllex.parsus.token.Token
-import me.alllex.parsus.token.TokenMatch
 
 /**
  * Parser executes a procedure of converting a portion of input into a value.
@@ -92,7 +91,7 @@ inline infix fun <T, R> Parser<T>.map(crossinline f: ParsingScope.(T) -> R): Par
 @Suppress("NOTHING_TO_INLINE")
 inline infix fun <T, R> Parser<T>.map(v: R): Parser<R> = map { v }
 
-data class MismatchedToken(val expected: Token, val found: TokenMatch) : ParseError()
+data class MismatchedToken(val expected: Token<*>, val found: TokenMatch<*>) : ParseError()
 
 data class NoMatchingToken(val fromIndex: Int) : ParseError()
 

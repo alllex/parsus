@@ -2,9 +2,9 @@
 
 package me.alllex.parsus.demo
 
+import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.regexToken
-import me.alllex.parsus.parser.*
 import kotlin.math.pow
 
 sealed class Expr {
@@ -18,7 +18,7 @@ sealed class Expr {
 }
 
 abstract class AbstractArithmeticGrammar<T> : Grammar<T>() {
-    init { register(regexToken("\\s+", ignored = true)) }
+    init { register(regexToken("\\s+", skip = true)) }
     val lpar by literalToken("(")
     val rpar by literalToken(")")
     val pow by literalToken("^")

@@ -1,12 +1,12 @@
 package me.alllex.parsus.bench
 
+import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.regexToken
-import me.alllex.parsus.parser.*
 
 
 object NaiveJsonGrammar : Grammar<Json>() {
-    init { register(regexToken("\\s+", ignored = true)) }
+    init { register(regexToken("\\s+", skip = true)) }
     private val comma by literalToken(",")
     private val colon by literalToken(":")
     private val lbrace by literalToken("{")

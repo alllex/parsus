@@ -57,11 +57,11 @@ class Tests {
 
         assertThat {
             g.parseToEnd("aa")
-        }.hasMismatchedToken(expected = g.b, actual = EofToken, offset = 2)
+        }.hasMismatchedToken(expected = g.b, actual = eofGrammarToken, offset = 2)
 
         assertThat {
             g.parseToEnd("aabbaa")
-        }.hasMismatchedToken(expected = EofToken, actual = g.a, offset = 4)
+        }.hasMismatchedToken(expected = eofGrammarToken, actual = g.a, offset = 4)
     }
 
     @Test
@@ -237,7 +237,7 @@ class Tests {
             assertThat(g.parseToEnd("b")).isEqualTo(node(g.b))
             assertThat(g.parseToEnd("ab")).isEqualTo(node(g.a, g.b))
             assertThat(g.parseToEnd("aab")).isEqualTo(node(g.a, g.a, g.b))
-            assertThat { g.parseToEnd("") }.hasMismatchedToken(g.b, EofToken, offset = 0)
+            assertThat { g.parseToEnd("") }.hasMismatchedToken(g.b, eofGrammarToken, offset = 0)
         }
     }
 
@@ -274,9 +274,11 @@ class Tests {
 
     companion object {
 
-        private fun node(vararg literals: LiteralToken, startOffset: Int = 0): Node {
+        private val eofGrammarToken = Token(EofTokenMatcher, name = "EOF")
+
+        private fun node(vararg literals: Token<LiteralTokenMatcher>, startOffset: Int = 0): Node {
             var offset = startOffset
-            val lexemes = mutableListOf<Lexeme>()
+            val lexemes = mutableListOf<Lexeme<LiteralTokenMatcher>>()
             for (literal in literals) {
                 val l = literal.lex(offset)
                 lexemes += l
@@ -290,11 +292,11 @@ class Tests {
 
         private fun node(children: List<SyntaxTree>) = Node(children)
 
-        private fun LiteralToken.lex(offset: Int): Lexeme {
-            return Lexeme(TokenMatch(this, offset, string.length), string)
+        private fun Token<LiteralTokenMatcher>.lex(offset: Int): Lexeme<LiteralTokenMatcher> {
+            return Lexeme(TokenMatch(this, offset, matcher.literal.length), matcher.literal)
         }
 
-        private fun Token.lex(text: String, offset: Int): Lexeme {
+        private fun <T : TokenMatcher> Token<T>.lex(text: String, offset: Int): Lexeme<T> {
             return Lexeme(TokenMatch(this, offset, text.length), text)
         }
 
@@ -313,8 +315,8 @@ class Tests {
         }
 
         private fun <T> Assert<Result<T>>.hasMismatchedToken(
-            expected: Token,
-            actual: Token,
+            expected: Token<*>,
+            actual: Token<*>,
             offset: Int,
         ) {
             isFailure()
@@ -322,10 +324,10 @@ class Tests {
                 .prop(ParseException::error)
                 .isInstanceOf(MismatchedToken::class)
                 .all {
-                    prop("expected token", MismatchedToken::expected).isEqualTo(expected)
-                    prop("actual lexeme", MismatchedToken::found).all {
-                        prop(TokenMatch::token).isEqualTo(actual)
-                        prop(TokenMatch::offset).isEqualTo(offset)
+                    prop("expected token") { it.expected }.isEqualTo(expected)
+                    prop("actual", MismatchedToken::found).all {
+                        prop("token") { it.token }.isEqualTo(actual)
+                        prop("offset") { it.offset }.isEqualTo(offset)
                     }
                 }
         }

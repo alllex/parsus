@@ -1,19 +1,14 @@
 package me.alllex.parsus.parser
 
-import me.alllex.parsus.token.EofToken
-import me.alllex.parsus.token.Token
+import me.alllex.parsus.token.*
+import me.alllex.parsus.token.EofTokenMatcher
 import kotlin.reflect.KProperty
-
-/**
- * Marker interface to scope extensions.
- */
-interface GrammarContext
 
 /**
  * Grammar defines all tokens that are expected to occur in the input
  * and the [root] parser which is used to [parse][parseToEnd] the resulting value.
  *
- * The tokens must either be [registered][registerToken] manually or using a property-delegate with the `by` keyword.
+ * The tokens must either be [registered][register] manually or using a property-delegate with the `by` keyword.
  * Declaring parsers using `by` is also a preferred way as it allows to use them recursively.
  *
  * ```kotlin
@@ -35,13 +30,16 @@ interface GrammarContext
  * }
  * ```
  */
-abstract class Grammar<out V> : GrammarContext {
+abstract class Grammar<out V>(
+    private val nameTokensFromProperties: Boolean = true
+) {
 
-    private val _tokens = mutableListOf<Token>()
+    private val tokens = mutableListOf<Token<*>>()
+    private val eofToken = Token(EofTokenMatcher, name = "EOF", skip = false)
 
     init {
         // important that it is the first
-        registerToken(EofToken)
+        register(eofToken)
     }
 
     abstract val root: Parser<V>
@@ -51,34 +49,33 @@ abstract class Grammar<out V> : GrammarContext {
      * Otherwise, throws a [ParseException] containing an error.
      */
     fun parseToEnd(input: String): V {
-        val lexer = Lexer(input, _tokens)
+        val lexer = Lexer(input, tokens)
         val parsingContext = ParsingContext(lexer)
         val untilEofParser = parser {
             val r = root()
-            EofToken()
+            eofToken()
             r
         }
 
         return parsingContext.runParser(untilEofParser)
     }
 
-    protected fun register(vararg tokens: Token) {
-        tokens.forEach { registerToken(it) }
+    fun register(token: Token<*>) {
+        tokens += token
     }
 
-    protected fun registerToken(token: Token) {
-        _tokens += token
-    }
-
-    protected operator fun <T : Token> T.provideDelegate(thisRef: Grammar<*>, property: KProperty<*>): T =
+    protected operator fun <T : TokenMatcher> Token<T>.provideDelegate(
+        thisRef: Grammar<*>,
+        property: KProperty<*>
+    ): Token<T> =
         also {
-            if (it.name == null) {
+            if (nameTokensFromProperties && it.name == null) {
                 it.name = property.name
             }
-            registerToken(it)
+            register(it)
         }
 
-    protected operator fun <T : Token> T.getValue(thisRef: Grammar<*>, property: KProperty<*>): T = this
+    protected operator fun <T : TokenMatcher> Token<T>.getValue(thisRef: Grammar<*>, property: KProperty<*>): Token<T> = this
 
     protected operator fun <R> Parser<R>.provideDelegate(thisRef: Grammar<*>, property: KProperty<*>): Parser<R> = this
 

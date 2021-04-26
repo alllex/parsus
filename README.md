@@ -7,7 +7,7 @@ A framework for writing composable parsers based on Kotlin Coroutines.
 
 ```kotlin
 val booleanGrammar = object : Grammar<BooleanExpression>() {
-    val ws by regexToken("\\s+", ignored = true)
+    init { register(regexToken("\\s+", skip = true)) }
     val id by regexToken("\\w+")
     val lpar by literalToken("(")
     val rpar by literalToken(")")
@@ -116,10 +116,7 @@ token anywhere else when writing parsers. Most often, the tokens that need to be
 
 ```kotlin
 val g2 = object : Grammar<String>() {
-    init {
-        register(regexToken("\\s+", ignored = true))
-    }
-
+    init { register(regexToken("\\s+", skip = true)) }
     val tokenA by literalToken("a")
     override val root by parser { tokenA().text }
 }

@@ -1,7 +1,8 @@
 package me.alllex.parsus.tree
 
 import me.alllex.parsus.token.Token
-import me.alllex.parsus.token.TokenMatch
+import me.alllex.parsus.token.TokenMatcher
+import me.alllex.parsus.parser.TokenMatch
 import me.alllex.parsus.parser.ParsingScope
 
 
@@ -30,15 +31,15 @@ data class Node(
 /**
  * A leaf-element of the [SyntaxTree].
  */
-data class Lexeme(
-    val match: TokenMatch,
+data class Lexeme<out T : TokenMatcher>(
+    val match: TokenMatch<T>,
     val text: String
 ) : SyntaxTree()
 
 /**
  * Parses [token] and returns corresponding lexeme.
  */
-suspend fun ParsingScope.lexeme(token: Token): Lexeme {
+suspend fun <T : TokenMatcher> ParsingScope.lexeme(token: Token<T>): Lexeme<T> {
     val match = token()
     return Lexeme(match, match.text)
 }
@@ -49,7 +50,7 @@ suspend fun ParsingScope.lexeme(token: Token): Lexeme {
 @JvmName("plus")
 operator fun SyntaxTree.plus(other: SyntaxTree): SyntaxTree {
     return when (this) {
-        is Lexeme -> Node(this, other)
+        is Lexeme<*> -> Node(this, other)
         is Node -> Node(this.children + other)
     }
 }

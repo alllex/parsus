@@ -1,17 +1,11 @@
 package me.alllex.parsus.token
 
-import me.alllex.parsus.parser.GrammarContext
-import org.intellij.lang.annotations.Language
 import java.util.regex.Matcher
 
 /**
  * A token that [matches] the input using a [regex].
  */
-class RegexToken(
-    regex: Regex,
-    name: String? = null,
-    ignored: Boolean = false,
-) : Token(name, ignored) {
+class RegexTokenMatcher(regex: Regex) : TokenMatcher {
 
     private val pattern: String = regex.pattern
     private val regex: Regex = prependPatternWithInputStart(pattern, regex.options)
@@ -35,24 +29,17 @@ class RegexToken(
         return end - fromIndex
     }
 
-    override fun toString(): String = "${name ?: ""} [$pattern]" + if (ignored) " [ignorable]" else ""
-
     companion object {
         private const val inputStartPrefix = "\\A"
     }
 }
 
-@Suppress("unused")
-fun GrammarContext.regexToken(
-    @Language("RegExp") pattern: String,
+fun regexToken(
+    regex: String,
     name: String? = null,
-    ignored: Boolean = false
-): RegexToken = RegexToken(Regex(pattern), name, ignored)
+    skip: Boolean = false,
+): Token<RegexTokenMatcher> {
 
-@Suppress("unused")
-fun GrammarContext.regexToken(
-    regex: Regex,
-    name: String? = null,
-    ignored: Boolean = false
-): RegexToken = RegexToken(regex, name, ignored)
-
+    val re = RegexTokenMatcher(regex.toRegex())
+    return Token(re, name, skip)
+}

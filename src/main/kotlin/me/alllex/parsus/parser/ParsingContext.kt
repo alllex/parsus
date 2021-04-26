@@ -1,7 +1,7 @@
 package me.alllex.parsus.parser
 
 import me.alllex.parsus.token.Token
-import me.alllex.parsus.token.TokenMatch
+import me.alllex.parsus.token.TokenMatcher
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.intrinsics.*
@@ -44,23 +44,24 @@ internal class ParsingContext(
         return when (parseResult) {
             is ParsedValue<*> -> (parseResult as ParsedValue<T>).value
             is ParseError -> throw ParseException(parseResult)
-            else ->  error("unexpected result: $parseResult")
+            else -> error("unexpected result: $parseResult")
         }
     }
 
-    override val TokenMatch.text: String get() = lexer.input.substring(offset, offset + length)
+    override val TokenMatch<*>.text: String get() = lexer.input.substring(offset, offset + length)
 
     override suspend fun <R> Parser<R>.invoke(): R = parseUnwrapping(this)
 
     override suspend fun <R> raw(p: Parser<R>): ParseResult<R> = parseResult(p)
 
-    override fun rawToken(token: Token): ParseResult<TokenMatch> {
+    override fun <T : TokenMatcher> rawToken(token: Token<T>): ParseResult<TokenMatch<T>> {
         val fromIndex = this.position
         val match = lexer.findMatch(fromIndex)
             ?: return NoMatchingToken(fromIndex)
         if (match.token != token) return MismatchedToken(token, match)
         this.position = match.offset + match.length
-        return ParsedValue(match)
+        @Suppress("UNCHECKED_CAST")
+        return ParsedValue(match) as ParseResult<TokenMatch<T>>
     }
 
     override suspend fun <R> any(p1: Parser<R>, p2: Parser<R>): R {

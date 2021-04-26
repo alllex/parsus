@@ -2,11 +2,11 @@
 
 package me.alllex.parsus.demo
 
-import me.alllex.parsus.token.literalToken
-import me.alllex.parsus.token.regexToken
 import me.alllex.parsus.parser.*
 import me.alllex.parsus.demo.BooleanExpression.*
 import me.alllex.parsus.parser.Grammar
+import me.alllex.parsus.token.literalToken
+import me.alllex.parsus.token.regexToken
 
 sealed class BooleanExpression {
     object TRUE : BooleanExpression()
@@ -19,7 +19,7 @@ sealed class BooleanExpression {
 }
 
 object BooleanGrammar : Grammar<BooleanExpression>() {
-    init { register(regexToken("\\s+", ignored = true)) }
+    init { register(regexToken("\\s+", skip = true)) }
     val tru by literalToken("true")
     val fal by literalToken("false")
     val id by regexToken("\\w+")

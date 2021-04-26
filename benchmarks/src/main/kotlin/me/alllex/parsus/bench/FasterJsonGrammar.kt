@@ -1,14 +1,14 @@
 package me.alllex.parsus.bench
 
-import me.alllex.parsus.token.literalToken
-import me.alllex.parsus.token.token
 import me.alllex.parsus.parser.*
+import me.alllex.parsus.token.literalToken
+import me.alllex.parsus.token.matchingToken
 
 
 object FasterJsonGrammar : Grammar<Json>() {
 
     @Suppress("unused")
-    private val whiteSpace by token(ignored = true, firstChars = " \n\t") { it, at ->
+    private val whiteSpace by matchingToken(skip = true, firstChars = " \n\t") { it, at ->
         var index = at
         val length = it.length
         while (index < length && it[index].isWhitespace()) { index++ }
@@ -25,7 +25,7 @@ object FasterJsonGrammar : Grammar<Json>() {
     private val trueToken by literalToken("true")
     private val falseToken by literalToken("false")
 
-    private val numToken by token(firstChars = "+-0123456789.") { it, at ->
+    private val numToken by matchingToken(firstChars = "+-0123456789.") { it, at ->
         var index = at
         val maybeSign = it[index]
         val sign = maybeSign == '+' || maybeSign == '-'
@@ -38,13 +38,13 @@ object FasterJsonGrammar : Grammar<Json>() {
             index++
             while (index < length && it[index].isDigit()) { index++ }
         }
-        if (index == at || (index == at + 1 && sign)) return@token 0
+        if (index == at || (index == at + 1 && sign)) return@matchingToken 0
         index - at
     }
 
-    private val stringToken by token(firstChars = "\"") { it, at ->
+    private val stringToken by matchingToken(firstChars = "\"") { it, at ->
         var index = at
-        if (it[index++] != '"') return@token 0
+        if (it[index++] != '"') return@matchingToken 0
         val length = it.length
         while (index < length && it[index] != '"') {
             if (it[index] == '\\') { // quote
@@ -52,7 +52,7 @@ object FasterJsonGrammar : Grammar<Json>() {
             }
             index++
         }
-        if (index == length) return@token 0 // unclosed string
+        if (index == length) return@matchingToken 0 // unclosed string
         index + 1 - at
     }
 
