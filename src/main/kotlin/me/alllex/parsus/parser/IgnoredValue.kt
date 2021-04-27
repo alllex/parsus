@@ -12,6 +12,9 @@ package me.alllex.parsus.parser
  */
 object IgnoredValue
 
+@Suppress("NOTHING_TO_INLINE", "UNUSED_PARAMETER")
+inline operator fun IgnoredValue.times(dropped: IgnoredValue): IgnoredValue = this
+
 @Suppress("NOTHING_TO_INLINE")
 inline operator fun <T> IgnoredValue.times(value: T): T = value
 
