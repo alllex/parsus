@@ -47,6 +47,8 @@ internal data class RangePattern(
     val ranges: List<CharRange>
 ) : PatternTree() {
 
+    constructor(vararg ranges: CharRange, not: Boolean = false) : this(not, ranges.toList())
+
     override fun match(input: CharSequence, pos: Int): Int {
         val c = input[pos]
         val m = ranges.any { c in it }
@@ -57,6 +59,9 @@ internal data class RangePattern(
 internal data class SequencePattern(
     val patterns: List<PatternTree>
 ) : PatternTree() {
+
+    constructor(vararg patterns: PatternTree) : this(patterns.toList())
+
     override fun match(input: CharSequence, pos: Int): Int {
         var p = pos
         for (pattern in patterns) {
@@ -71,6 +76,9 @@ internal data class SequencePattern(
 internal data class AlternativePattern(
     val patterns: List<PatternTree>
 ) : PatternTree() {
+
+    constructor(vararg patterns: PatternTree) : this(patterns.toList())
+
     override fun match(input: CharSequence, pos: Int): Int {
         for (pattern in patterns) {
             val r = pattern.match(input, pos)
@@ -117,15 +125,17 @@ internal object PatternGrammar : Grammar<PatternTree>() {
     private val plus by literalToken("+")
     private val pipe by literalToken("|")
     private val caret by literalToken("^")
-    private val aChar by token { input, pos ->
+    private val aCharToken by token { input, pos ->
         val c = input[pos]
         if (c == ')' || c == ']') 0 else 1
     }
+    private val anyCharToken by token { _, _ -> 1 }
 
-    private val char by char(aChar)
-    private val escapedChar by parser { -slash * char() }
+    private val char by char(aCharToken)
+    private val escapedChar by parser { -slash * any(slash, anyCharToken) } map { it.text[0] }
     private val escaped by escapedChar map { LiteralPattern(it) }
     private val wildcard by dot map WildcardPattern
+    private val literal by char map { LiteralPattern(it) }
 
     private val range by parser {
         val c1 = any(escapedChar, char)
@@ -144,7 +154,7 @@ internal object PatternGrammar : Grammar<PatternTree>() {
 
     private val braces by parser { -lpar * root() * -rpar }
 
-    private val term by wildcard or escaped or brackets or braces
+    private val term by wildcard or escaped or brackets or braces or literal
 
     private val repeatMod by q or star or plus
 
