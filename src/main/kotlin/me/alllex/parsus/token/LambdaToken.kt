@@ -7,7 +7,7 @@ import me.alllex.parsus.parser.GrammarContext
  */
 @Suppress("unused")
 inline fun GrammarContext.token(
-    name: String = "{lambda}",
+    name: String? = null,
     ignored: Boolean = false,
     firstChars: String = "",
     crossinline matcher: (CharSequence, Int) -> Int
@@ -15,6 +15,5 @@ inline fun GrammarContext.token(
     return object : Token(name, ignored) {
         override fun match(input: CharSequence, fromIndex: Int) = matcher(input, fromIndex)
         override val firstChars: String = firstChars
-        override fun toString() = name + if (ignored) " [ignorable]" else ""
     }
 }
