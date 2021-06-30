@@ -1,6 +1,7 @@
 # Parsus
 
-[![JitPack](https://jitpack.io/v/alllex/parsus.svg)](https://jitpack.io/#alllex/parsus)
+[![Maven Central](https://img.shields.io/maven-central/v/me.alllex.parsus/parsus.svg?color=success)](https://search.maven.org/search?q=g:me.alllex.parsus)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Gradle build](https://github.com/alllex/parsus/actions/workflows/gradle.yml/badge.svg)](https://github.com/alllex/parsus/actions/workflows/gradle.yml)
 
 A framework for writing composable parsers based on Kotlin Coroutines.
@@ -34,8 +35,18 @@ val ast = booleanGrammar.parseToEnd("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a
 
 ```kotlin
 dependencies {
-    implementation("com.github.alllex:parsus:v0.1.2")
+    implementation("me.alllex.parsus:parsus:0.1.3")
 }
+```
+
+### Using with Maven
+
+```xml
+<dependency>
+  <groupId>me.alllex.parsus</groupId>
+  <artifactId>parsus</artifactId>
+  <version>0.1.3</version>
+</dependency>
 ```
 
 ## Features
