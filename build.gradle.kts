@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "me.alllex.parsus"
-version = "0.1.4"
+version = "0.1.5-SNAPSHOT"
 
 dependencies {
     testImplementation(kotlin("test-junit"))
