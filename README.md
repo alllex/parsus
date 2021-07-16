@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Gradle build](https://github.com/alllex/parsus/actions/workflows/gradle.yml/badge.svg)](https://github.com/alllex/parsus/actions/workflows/gradle.yml)
 
-A framework for writing composable parsers based on Kotlin Coroutines.
+A framework for writing composable parsers based on [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview-fhwiurfhweiruhweifuvhweifwvh.html).
 
 ```kotlin
 val booleanGrammar = object : Grammar<BooleanExpression>() {
