@@ -5,6 +5,7 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.allopen") version "1.4.32"
     id("org.jetbrains.kotlinx.benchmark") version "0.3.0"
+    id("org.jetbrains.kotlinx.kover") version "0.6.1"
 }
 
 sourceSets.all {

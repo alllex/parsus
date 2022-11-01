@@ -5,6 +5,7 @@ plugins {
     signing
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("org.jetbrains.kotlinx.kover") version "0.6.1"
 }
 
 group = "me.alllex.parsus"
@@ -21,6 +22,28 @@ repositories {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "${JavaVersion.VERSION_11}"
+}
+
+kover {
+    htmlReport {
+        reportDir.set(layout.buildDirectory.dir("reports/kover/my-html"))
+    }
+}
+
+koverMerged {
+    enable()
+    filters {
+        classes {
+            excludes += "me.alllex.parsus.token.*"
+        }
+        projects {
+            excludes += "benchmarks"
+        }
+    }
+
+    htmlReport {
+        reportDir.set(layout.buildDirectory.dir("reports/kover/my-merged-html"))
+    }
 }
 
 configure<JavaPluginExtension> {
