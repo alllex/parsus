@@ -14,5 +14,5 @@ repositories {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "${JavaVersion.VERSION_1_8}"
+    kotlinOptions.jvmTarget = "${JavaVersion.VERSION_11}"
 }

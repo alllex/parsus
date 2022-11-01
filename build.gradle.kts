@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version "1.7.20"
     signing
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
@@ -20,7 +20,7 @@ repositories {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "${JavaVersion.VERSION_1_8}"
+    kotlinOptions.jvmTarget = "${JavaVersion.VERSION_11}"
 }
 
 configure<JavaPluginExtension> {
