@@ -28,6 +28,17 @@ kover {
     htmlReport {
         reportDir.set(layout.buildDirectory.dir("reports/kover/my-html"))
     }
+
+    verify {
+        onCheck.set(true)
+        rule {
+            bound {
+                minValue = 75
+                counter = kotlinx.kover.api.CounterType.LINE
+                valueType = kotlinx.kover.api.VerificationValueType.COVERED_PERCENTAGE
+            }
+        }
+    }
 }
 
 koverMerged {
@@ -43,6 +54,23 @@ koverMerged {
 
     htmlReport {
         reportDir.set(layout.buildDirectory.dir("reports/kover/my-merged-html"))
+    }
+
+    verify {
+        onCheck.set(true)
+
+        rule {
+            isEnabled = true
+            overrideClassFilter {
+                includes += "me.alllex.parsus.parser.*"
+            }
+
+            bound {
+                minValue = 90
+                counter = kotlinx.kover.api.CounterType.LINE
+                valueType = kotlinx.kover.api.VerificationValueType.COVERED_PERCENTAGE
+            }
+        }
     }
 }
 
