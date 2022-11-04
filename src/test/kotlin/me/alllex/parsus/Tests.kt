@@ -89,6 +89,31 @@ class Tests {
     }
 
     @Test
+    fun `Lambda token`() {
+        val g = object : Grammar<SyntaxTree>() {
+            val numToken by token(firstChars = "+-0123456789.") { it, at ->
+                var index = at
+                val maybeSign = it[index]
+                val sign = maybeSign == '+' || maybeSign == '-'
+                if (sign) index++
+
+                val length = it.length
+                while (index < length && it[index].isDigit()) { index++ }
+
+                if (index < length && it[index] == '.') { // decimal
+                    index++
+                    while (index < length && it[index].isDigit()) { index++ }
+                }
+                if (index == at || (index == at + 1 && sign)) return@token 0
+                index - at
+            }
+            override val root = parser { lexeme(numToken) }
+        }
+
+        assertThat(g.parseToEnd("+42.5")).isEqualTo(g.numToken.lex("+42.5", 0))
+    }
+
+    @Test
     fun `Nested parsers`() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")

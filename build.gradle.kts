@@ -25,10 +25,6 @@ tasks.withType<KotlinCompile> {
 }
 
 kover {
-    htmlReport {
-        reportDir.set(layout.buildDirectory.dir("reports/kover/my-html"))
-    }
-
     verify {
         onCheck.set(true)
         rule {

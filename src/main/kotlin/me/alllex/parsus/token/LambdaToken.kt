@@ -5,12 +5,12 @@ import me.alllex.parsus.parser.GrammarContext
 /**
  * Most general form of a token, defined by a function that [matches] the input.
  */
-@Suppress("unused")
+@Suppress("UnusedReceiverParameter")
 inline fun GrammarContext.token(
     name: String = "{lambda}",
     ignored: Boolean = false,
     firstChars: String = "",
-    crossinline matcher: (CharSequence, Int) -> Int
+    crossinline matcher: (input: CharSequence, fromIndex: Int) -> Int
 ): Token {
     return object : Token(name, ignored) {
         override fun match(input: CharSequence, fromIndex: Int) = matcher(input, fromIndex)
