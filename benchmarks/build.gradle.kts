@@ -4,7 +4,7 @@ plugins {
     java
     kotlin("jvm")
     kotlin("plugin.allopen") version "1.4.32"
-    id("org.jetbrains.kotlinx.benchmark") version "0.3.0"
+    id("org.jetbrains.kotlinx.benchmark") version "0.4.6"
 }
 
 sourceSets.all {
@@ -14,7 +14,7 @@ sourceSets.all {
 
 dependencies {
     implementation(rootProject)
-    implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime-jvm:0.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime-jvm:0.4.6")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
     testImplementation(kotlin("test-junit"))
 }
