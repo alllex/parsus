@@ -1,10 +1,14 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     java
     kotlin("jvm")
-    kotlin("plugin.allopen") version "1.4.32"
+    kotlin("plugin.allopen") version "1.8.10"
     id("org.jetbrains.kotlinx.benchmark") version "0.4.6"
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 sourceSets.all {
@@ -21,10 +25,6 @@ dependencies {
 
 repositories {
     mavenCentral()
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "${JavaVersion.VERSION_11}"
 }
 
 allOpen.annotation("org.openjdk.jmh.annotations.State")

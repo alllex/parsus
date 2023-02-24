@@ -1,7 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("jvm") version "1.7.20"
+    kotlin("jvm") version "1.8.10"
     signing
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
@@ -9,6 +7,12 @@ plugins {
 
 group = "me.alllex.parsus"
 version = "0.1.5-SNAPSHOT"
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 dependencies {
     testImplementation(kotlin("test-junit"))
@@ -19,23 +23,20 @@ repositories {
     mavenCentral()
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "${JavaVersion.VERSION_11}"
-}
-
-configure<JavaPluginExtension> {
+java {
     withJavadocJar()
     withSourcesJar()
 }
 
-configure<SigningExtension> {
+signing {
     val signingKey: String? by project
     val signingPassword: String? by project
     val publishing: PublishingExtension by project
 
-    if (signingKey == null || signingPassword == null) return@configure
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign(publishing.publications)
+    if (signingKey != null && signingPassword != null) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign(publishing.publications)
+    }
 }
 
 nexusPublishing {
