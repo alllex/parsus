@@ -11,7 +11,7 @@ interface GrammarContext
 
 /**
  * Grammar defines all tokens that are expected to occur in the input
- * and the [root] parser which is used to [parse][parseToEnd] the resulting value.
+ * and the [root] parser which is used to [parse][parseEntire] the resulting value.
  *
  * The tokens must either be [registered][registerToken] manually or using a property-delegate with the `by` keyword.
  * Declaring parsers using `by` is also a preferred way as it allows to use them recursively.

@@ -44,7 +44,7 @@ fun main() {
             "v5": { "such": ["json"] }
         }
     """.trimIndent()
-    val json = NaiveJsonGrammar.parseToEnd(input)
+    val json = NaiveJsonGrammar.parseEntireOrThrow(input)
     printJson(json)
 }
 

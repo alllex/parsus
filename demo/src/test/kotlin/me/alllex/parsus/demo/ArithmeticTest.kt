@@ -9,7 +9,7 @@ class ArithmeticTest {
     @Test
     fun `Expr parsing`() {
         assertEquals(
-            actual = ExprParser.parseToEnd("-1 + 2 * 3 + 4 ^ 5 + 6 * (7 - 8)"),
+            actual = ExprParser.parseEntireOrThrow("-1 + 2 * 3 + 4 ^ 5 + 6 * (7 - 8)"),
             expected = Add(
                 Add(
                     Add(
@@ -26,7 +26,7 @@ class ArithmeticTest {
     @Test
     fun `Expr calculation`() {
         assertEquals(
-            actual = ExprCalculator.parseToEnd("-1 + 2 * 3 + 4 ^ 5 + 6 * (7 - 8)"),
+            actual = ExprCalculator.parseEntireOrThrow("-1 + 2 * 3 + 4 ^ 5 + 6 * (7 - 8)"),
             expected = 1023
         )
     }

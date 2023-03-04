@@ -16,6 +16,6 @@ class ReadmeTest {
             override val root by parser { tokenA().text }
         }
 
-        assertThat(g1.parseToEnd("a")).isEqualTo("a")
+        assertThat(g1.parseEntireOrThrow("a")).isEqualTo("a")
     }
 }
