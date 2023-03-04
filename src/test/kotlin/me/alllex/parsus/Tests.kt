@@ -207,14 +207,18 @@ class Tests {
             val a by literalToken("a")
             val b by literalToken("b")
             val c by literalToken("c")
+            init { registerToken(literalToken("d")) }
             val ap = parser { lexeme(a) }
             val bp = parser { lexeme(b) }
             val cp = parser { lexeme(c) }
-            override val root = parser { any(ap, bp, cp) }
+            val abcp = parser { any(ap, bp, cp) }
+            override val root = parser { node(abcp() + abcp())}
         }.let { g ->
-            assertThat(g.parseEntireOrThrow("a")).isEqualTo(g.a.lex(0))
-            assertThat(g.parseEntireOrThrow("b")).isEqualTo(g.b.lex(0))
-            assertThat(g.parseEntireOrThrow("c")).isEqualTo(g.c.lex(0))
+            assertThat(g.parseEntireOrThrow("ab")).isEqualTo(node(g.a, g.b))
+            assertThat(g.parseEntireOrThrow("bc")).isEqualTo(node(g.b, g.c))
+            assertThat(g.parseEntireOrThrow("ca")).isEqualTo(node(g.c, g.a))
+            assertThat(g.parseEntire("d")).failedWith(NoViableAlternative(0))
+            assertThat(g.parseEntire("bd")).failedWith(NoViableAlternative(1))
         }
 
         object : Grammar<SyntaxTree>() {

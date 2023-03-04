@@ -63,11 +63,14 @@ suspend fun <R> ParsingScope.any(p: Parser<R>, vararg ps: Parser<R>): R = any(p,
 suspend fun <R> ParsingScope.any(p: Parser<R>, ps: List<Parser<R>>): R {
     if (ps.isEmpty()) return p()
 
-    return any(p, parser {
-        val head = ps.first()
-        val tail = ps.subList(1, ps.size)
-        any(head, tail)
-    })
+    val startOffset = this.currentOffset
+    for (i in -1..ps.lastIndex) {
+        val alt = if (i == -1) p else ps[i]
+        val r = raw(alt)
+        if (r is ParsedValue) return r.value
+    }
+
+    fail(NoViableAlternative(startOffset))
 }
 
 suspend fun <R : Any> ParsingScope.trying(p: Parser<R>): R? {
