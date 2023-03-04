@@ -47,28 +47,30 @@ suspend fun ParsingScope.lexeme(token: Token): Lexeme {
  * Returns a tree that combines [this] and [other] tree on the same node-level.
  */
 @JvmName("plus")
-operator fun SyntaxTree.plus(other: SyntaxTree): SyntaxTree {
-    return when (this) {
-        is Lexeme -> Node(this, other)
-        is Node -> Node(this.children + other)
-    }
+operator fun SyntaxTree.plus(other: SyntaxTree): List<SyntaxTree> {
+    return listOf(this, other)
+}
+
+@JvmName("plusMany")
+operator fun SyntaxTree.plus(others: List<SyntaxTree>): List<SyntaxTree> {
+    return listOf(this) + others
 }
 
 @JvmName("plusNullable")
-operator fun SyntaxTree.plus(other: SyntaxTree?): SyntaxTree {
-    return if (other == null) this else this + other
+operator fun SyntaxTree.plus(other: SyntaxTree?): List<SyntaxTree> {
+    return if (other == null) listOf(this) else this + other
 }
 
 @JvmName("nullablePlus")
-operator fun SyntaxTree?.plus(other: SyntaxTree): SyntaxTree {
-    return if (this == null) other else this + other
+operator fun SyntaxTree?.plus(other: SyntaxTree): List<SyntaxTree> {
+    return if (this == null) listOf(other) else this + other
 }
 
 @JvmName("nullablePlusNullable")
-operator fun SyntaxTree?.plus(other: SyntaxTree?): SyntaxTree? {
+operator fun SyntaxTree?.plus(other: SyntaxTree?): List<SyntaxTree> {
     return when {
-        this == null -> other
-        other == null -> this
+        this == null -> listOfNotNull(other)
+        other == null -> listOf(this)
         else -> this + other
     }
 }

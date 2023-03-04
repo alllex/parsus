@@ -22,9 +22,9 @@ abstract class ParseError : ParseResult<Nothing>() {
 }
 
 data class MismatchedToken(val expected: Token, val found: TokenMatch) : ParseError()
-data class NoMatchingToken(val fromIndex: Int) : ParseError()
-data class NoViableAlternative(val fromIndex: Int) : ParseError()
-data class NotEnoughRepetition(val expectedAtLeast: Int, val actualCount: Int) : ParseError()
+data class NoMatchingToken(val offset: Int) : ParseError()
+data class NoViableAlternative(val offset: Int) : ParseError()
+data class NotEnoughRepetition(val offset: Int, val expectedAtLeast: Int, val actualCount: Int) : ParseError()
 
 class ParseException(val error: ParseError) : Exception() {
     override fun toString(): String = "ParseException($error)"

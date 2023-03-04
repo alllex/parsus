@@ -46,6 +46,11 @@ interface ParsingScope {
      */
     val TokenMatch.text: String
 
+    /**
+     * Current offset in the input
+     */
+    val currentOffset: Int
+
     suspend operator fun Parser<*>.unaryMinus(): IgnoredValue = ignoring(this)
 
     suspend operator fun Parser<Any>.not(): Boolean = having(this)
@@ -90,6 +95,7 @@ suspend fun <R : Any> ParsingScope.repeating(p: Parser<R>, atLeast: Int, atMost:
     require(atLeast >= 0) { "atLeast must not be negative" }
     require(atMost == -1 || atLeast <= atMost) { "atMost has invalid value" }
 
+    val startOffset = currentOffset
     val results = mutableListOf<R>()
     var repetition = 0
     while (atMost == -1 || repetition < atMost) {
@@ -97,7 +103,7 @@ suspend fun <R : Any> ParsingScope.repeating(p: Parser<R>, atLeast: Int, atMost:
         repetition++
     }
 
-    if (repetition < atLeast) fail(NotEnoughRepetition(atLeast, repetition))
+    if (repetition < atLeast) fail(NotEnoughRepetition(startOffset, atLeast, repetition))
     return results
 }
 
