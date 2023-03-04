@@ -122,20 +122,21 @@ suspend fun <T : Any> ParsingScope.separated(
     return values
 }
 
-suspend fun <T : Any, S : Any> ParsingScope.leftAssociative(
+suspend inline fun <T : Any, S : Any> ParsingScope.leftAssociative(
     term: Parser<T>,
     operator: Parser<S>,
     transform: (T, S, T) -> T
 ): T {
     var l: T = term()
     while (true) {
-        val (o, r) = trying(parser { operator() to term() }) ?: break
+        val o = trying(operator) ?: break
+        val r = term()
         l = transform(l, o, r)
     }
     return l
 }
 
-suspend fun <T : Any, S : Any> ParsingScope.rightAssociative(
+suspend inline fun <T : Any, S : Any> ParsingScope.rightAssociative(
     term: Parser<T>,
     operator: Parser<S>,
     transform: (T, S, T) -> T
