@@ -5,22 +5,19 @@ import me.alllex.parsus.token.TokenMatch
 import kotlin.coroutines.RestrictsSuspension
 
 /**
- * Provide necessary scope to compose and execute parsers.
+ * Provides necessary scope to compose and execute parsers.
+ *
+ * Instances of the scope are automatically created when parsing [starts][Grammar.parseEntire].
  */
 @RestrictsSuspension
 interface ParsingScope {
 
     /**
-     * Runs [this] parser and returns parsed value.
+     * Runs the parser and returns its parsed value.
      *
-     * If parser fails, execution is continued at the next alternative.
+     * If the parser fails, execution is continued at the next alternative.
      */
     suspend operator fun <R> Parser<R>.invoke(): R
-
-    /**
-     * Tries to parse given [token] at the current position in the input.
-     */
-    fun rawToken(token: Token): ParseResult<TokenMatch>
 
     /**
      * Runs the parser, returning wrapped result.
@@ -28,13 +25,27 @@ interface ParsingScope {
      * If this or any underlying parser fails, execution is continued here
      * with a wrapped [error][ParseError].
      */
-    suspend fun <R> raw(p: Parser<R>): ParseResult<R>
+    suspend fun <R> tryParse(p: Parser<R>): ParseResult<R>
 
     /**
-     * Returns the result of [the first parser][p1] if parsing succeeds,
-     * otherwise returns the result of [the second parser][p2].
+     * Tries to parse given [token] at the current position in the input.
      */
-    suspend fun <R> any(p1: Parser<R>, p2: Parser<R>): R
+    fun tryParse(token: Token): ParseResult<TokenMatch>
+
+    /**
+     * Runs the parser, returning wrapped result.
+     *
+     * If this or any underlying parser fails, execution is continued here
+     * with a wrapped [error][ParseError].
+     */
+    @Deprecated("Use `tryParse` instead", ReplaceWith("this.tryParse(p)"), DeprecationLevel.WARNING)
+    suspend fun <R> raw(p: Parser<R>): ParseResult<R> = tryParse(p)
+
+    /**
+     * Tries to parse given [token] at the current position in the input.
+     */
+    @Deprecated("Use `tryParse` instead", ReplaceWith("this.tryParse(token)"), DeprecationLevel.WARNING)
+    fun rawToken(token: Token): ParseResult<TokenMatch> = tryParse(token)
 
     /**
      * Bails out with given [error], continuing execution at the next alternative.
@@ -42,14 +53,14 @@ interface ParsingScope {
     suspend fun fail(error: ParseError): Nothing
 
     /**
-     * Extracts the text corresponding to the token match from the input.
-     */
-    val TokenMatch.text: String
-
-    /**
      * Current offset in the input
      */
     val currentOffset: Int
+
+    /**
+     * Extracts the text corresponding to the token match from the input.
+     */
+    val TokenMatch.text: String
 
     suspend operator fun Parser<*>.unaryMinus(): IgnoredValue = ignoring(this)
 

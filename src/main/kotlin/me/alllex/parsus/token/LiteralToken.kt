@@ -28,7 +28,7 @@ class LiteralToken(
     override fun toString(): String = "LiteralToken('$string')"
 }
 
-@Suppress("unused")
+@Suppress("UnusedReceiverParameter")
 fun GrammarContext.literalToken(
     text: String,
     name: String? = null,

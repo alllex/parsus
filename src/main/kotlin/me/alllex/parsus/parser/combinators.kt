@@ -1,6 +1,58 @@
 package me.alllex.parsus.parser
 
+/**
+ * Creates a combined parser that will try the receiver parser first,
+ * and fall back to the other parser in case of a parse error.
+ *
+ * ```kotlin
+ *  val id by regexToken("\\[a-z]+")
+ *  val int by regexToken("\\d+")
+ *  val term by id or (int map { it.text.toInt() })
+ * ```
+ */
 infix fun <R> Parser<R>.or(p: Parser<R>): Parser<R> = parser { any(this@or, p) }
+
+/**
+ * Applies given function to the result of [this] parser.
+ *
+ * ```kotlin
+ *  val int by regexToken("\\d+")
+ *  val number by parser { int() } map { it.text.toInt() }
+ * ```
+ */
+inline infix fun <T, R> Parser<T>.map(crossinline f: ParsingScope.(T) -> R): Parser<R> = parser { f(parse()) }
+
+/**
+ * When parsing is successful, simply returns given value.
+ *
+ * It is useful when a parsed token needs to be substituted with a semantic value.
+ * ```kotlin
+ * interface Marker
+ * object MainMarker : Marker
+ *
+ * object G : Grammar<Marker> {
+ *     val main by literalToken("main")
+ *     override val root by parser { main() } map MainMarker
+ * }
+ * ```
+ */
+@Suppress("NOTHING_TO_INLINE")
+inline infix fun <T, R> Parser<T>.map(v: R): Parser<R> = map { v }
+
+/**
+ * Returns the result of [the first parser][p1] if parsing succeeds,
+ * otherwise returns the result of [the second parser][p2].
+ */
+suspend fun <R> ParsingScope.any(p1: Parser<R>, p2: Parser<R>): R {
+    val startOffset = currentOffset
+    val r1 = tryParse(p1)
+    if (r1 is ParsedValue) return r1.value
+
+    val r2 = tryParse(p2)
+    if (r2 is ParsedValue) return r2.value
+
+    fail(NoViableAlternative(startOffset))
+}
 
 suspend fun <R> ParsingScope.any(p: Parser<R>, vararg ps: Parser<R>): R = any(p, ps.toList())
 
@@ -10,17 +62,14 @@ suspend fun <R> ParsingScope.any(p: Parser<R>, ps: List<Parser<R>>): R {
     val startOffset = this.currentOffset
     for (i in -1..ps.lastIndex) {
         val alt = if (i == -1) p else ps[i]
-        val r = raw(alt)
+        val r = tryParse(alt)
         if (r is ParsedValue) return r.value
     }
 
     fail(NoViableAlternative(startOffset))
 }
 
-suspend fun <R : Any> ParsingScope.trying(p: Parser<R>): R? {
-    val r = raw(p)
-    return if (r is ParsedValue) r.value else null
-}
+suspend fun <R : Any> ParsingScope.trying(p: Parser<R>): R? = tryParse(p).getOrElse { null }
 
 /**
  * Executes given parser, ignoring the result.

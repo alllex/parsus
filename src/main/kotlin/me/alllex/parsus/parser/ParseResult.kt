@@ -37,6 +37,20 @@ class ParseException(val error: ParseError) : Exception() {
     override fun toString(): String = "ParseException($error)"
 }
 
+inline fun <T, R> ParseResult<T>.map(f: (T) -> R): ParseResult<R> {
+    return when (this) {
+        is ParsedValue -> ParsedValue(f(value))
+        is ParseError -> this
+    }
+}
+
+inline fun <T> ParseResult<T>.getOrElse(f: (ParseError) -> T): T {
+    return when (this) {
+        is ParsedValue -> value
+        is ParseError -> f(this)
+    }
+}
+
 fun <T> ParseResult<T>.getOrThrow(): T {
     return when (this) {
         is ParsedValue -> value

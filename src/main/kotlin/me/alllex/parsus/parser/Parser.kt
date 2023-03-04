@@ -31,30 +31,3 @@ interface Parser<out T> {
 inline fun <T> parser(crossinline block: suspend ParsingScope.() -> T): Parser<T> = object : Parser<T> {
     override suspend fun ParsingScope.parse(): T = block()
 }
-
-/**
- * Applies given function to the result of [this] parser.
- * ```kotlin
- *  val int by regexToken("\\d+")
- *  val number by parser { int() } map { it.text.toInt() }
- * ```
- */
-inline infix fun <T, R> Parser<T>.map(crossinline f: ParsingScope.(T) -> R): Parser<R> = parser { f(parse()) }
-
-/**
- * When parsing is successful, simply returns given value.
- *
- * It is useful when a parsed token needs to be substituted with a semantic value.
- * ```kotlin
- * interface Marker
- * object MainMarker : Marker
- *
- * object G : Grammar<Marker> {
- *     val main by literalToken("main")
- *     override val root by parser { main() } map MainMarker
- * }
- * ```
- */
-@Suppress("NOTHING_TO_INLINE")
-inline infix fun <T, R> Parser<T>.map(v: R): Parser<R> = map { v }
-

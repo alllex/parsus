@@ -46,6 +46,10 @@ abstract class Grammar<out V> : GrammarContext {
 
     abstract val root: Parser<V>
 
+    /**
+     * Parses entire input and returns the parsed value wrapped in the [ParseResult].
+     * If parsing fails the result will be a [ParseError].
+     */
     fun parseEntire(input: String): ParseResult<V> {
         val lexer = Lexer(input, _tokens)
         val parsingContext = ParsingContext(lexer)

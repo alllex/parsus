@@ -1,9 +1,8 @@
 package me.alllex.parsus.token
 
-import me.alllex.parsus.parser.ParseError
-import me.alllex.parsus.parser.ParsedValue
 import me.alllex.parsus.parser.Parser
 import me.alllex.parsus.parser.ParsingScope
+import me.alllex.parsus.parser.getOrElse
 
 /**
  * Token is a semantic unit in the parsing process.
@@ -19,14 +18,13 @@ abstract class Token(
     /**
      * Matches the pattern of this token against the input,
      * and returns the length of the matched lexeme.
+     *
+     * The mismatch is indicated by returning the length value of zero `0`.
      */
     abstract fun match(input: CharSequence, fromIndex: Int): Int
 
     override suspend fun ParsingScope.parse(): TokenMatch {
-        return when (val r = rawToken(this@Token)) {
-            is ParsedValue -> r.value
-            is ParseError -> fail(r)
-        }
+        return tryParse(this@Token).getOrElse { fail(it) }
     }
 
     /**

@@ -39,26 +39,15 @@ internal class ParsingContext(
 
     override suspend fun <R> Parser<R>.invoke(): R = parse()
 
-    override suspend fun <R> raw(p: Parser<R>): ParseResult<R> = tryParse(p)
+    override suspend fun <R> tryParse(p: Parser<R>): ParseResult<R> = tryParseImpl(p)
 
-    override fun rawToken(token: Token): ParseResult<TokenMatch> {
+    override fun tryParse(token: Token): ParseResult<TokenMatch> {
         val fromIndex = this.position
         val match = lexer.findMatch(fromIndex)
             ?: return NoMatchingToken(fromIndex)
         if (match.token != token) return MismatchedToken(token, match)
         this.position = match.offset + match.length
         return ParsedValue(match)
-    }
-
-    override suspend fun <R> any(p1: Parser<R>, p2: Parser<R>): R {
-        val curPosition = this.position
-        val r1 = tryParse(p1)
-        if (r1 is ParsedValue) return r1.value
-
-        val r2 = tryParse(p2)
-        if (r2 is ParsedValue) return r2.value
-
-        fail(NoViableAlternative(curPosition))
     }
 
     override suspend fun fail(error: ParseError): Nothing {
@@ -70,7 +59,7 @@ internal class ParsingContext(
         error("the coroutine must have been cancelled")
     }
 
-    private suspend fun <T> tryParse(parser: Parser<T>): ParseResult<T> {
+    private suspend fun <T> tryParseImpl(parser: Parser<T>): ParseResult<T> {
         return suspendCoroutineUninterceptedOrReturn { mergeCont ->
             val prevBacktrack = this.backtrackCont
             val curPosition = this.position
