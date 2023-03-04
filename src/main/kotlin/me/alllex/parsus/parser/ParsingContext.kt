@@ -39,7 +39,14 @@ internal class ParsingContext(
 
     override suspend fun <R> Parser<R>.invoke(): R = parse()
 
-    override suspend fun <R> tryParse(p: Parser<R>): ParseResult<R> = tryParseImpl(p)
+    override suspend fun <R> tryParse(p: Parser<R>): ParseResult<R> {
+        if (p is Token) {
+            val tr = tryParse(p)
+            @Suppress("UNCHECKED_CAST")
+            return tr as ParseResult<R> // Token can only be a `Parser<TokenMatch>`
+        }
+        return tryParseImpl(p)
+    }
 
     override fun tryParse(token: Token): ParseResult<TokenMatch> {
         val fromIndex = this.position
