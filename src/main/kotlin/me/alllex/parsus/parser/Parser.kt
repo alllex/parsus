@@ -25,23 +25,15 @@ import me.alllex.parsus.token.TokenMatch
  * ```
  */
 interface Parser<out T> {
-    suspend fun ParsingScope.parse(): ParseResult<T>
+    suspend fun ParsingScope.parse(): T
 }
 
 /**
  * Converts given [block] into a parser.
  */
-@Suppress("FunctionName")
-inline fun <T> Parser(crossinline block: suspend ParsingScope.() -> ParseResult<T>): Parser<T> {
-    return object : Parser<T> {
-        override suspend fun ParsingScope.parse(): ParseResult<T> = block()
-    }
+inline fun <T> parser(crossinline block: suspend ParsingScope.() -> T): Parser<T> = object : Parser<T> {
+    override suspend fun ParsingScope.parse(): T = block()
 }
-
-/**
- * Converts given [block] into a parser.
- */
-inline fun <R> parser(crossinline block: suspend ParsingScope.() -> R): Parser<R> = Parser { ParsedValue(block()) }
 
 /**
  * Result of a parse that is either a [parsed value][ParsedValue]
@@ -68,12 +60,7 @@ abstract class ParseError : ParseResult<Nothing>() {
  *  val number by parser { int() } map { it.text.toInt() }
  * ```
  */
-inline infix fun <T, R> Parser<T>.map(crossinline f: ParsingScope.(T) -> R): Parser<R> = Parser {
-    when (val v = parse()) {
-        is ParsedValue -> ParsedValue(f(v.value))
-        is ParseError -> v
-    }
-}
+inline infix fun <T, R> Parser<T>.map(crossinline f: ParsingScope.(T) -> R): Parser<R> = parser { f(parse()) }
 
 /**
  * When parsing is successful, simply returns given value.
@@ -103,4 +90,11 @@ data class NotEnoughRepetition(val expectedAtLeast: Int, val actualCount: Int) :
 @Suppress("MemberVisibilityCanBePrivate")
 class ParseException(val error: ParseError) : Exception() {
     override fun toString(): String = "ParseException($error)"
+}
+
+fun <T> ParseResult<T>.getOrThrow(): T {
+    return when (this) {
+        is ParsedValue -> value
+        is ParseError -> throw ParseException(this)
+    }
 }

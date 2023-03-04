@@ -46,11 +46,7 @@ abstract class Grammar<out V> : GrammarContext {
 
     abstract val root: Parser<V>
 
-    /**
-     * If parsing is successful, returns a value.
-     * Otherwise, throws a [ParseException] containing an error.
-     */
-    fun parseToEnd(input: String): V {
+    fun parseEntire(input: String): ParseResult<V> {
         val lexer = Lexer(input, _tokens)
         val parsingContext = ParsingContext(lexer)
         val untilEofParser = parser {
@@ -61,6 +57,21 @@ abstract class Grammar<out V> : GrammarContext {
 
         return parsingContext.runParser(untilEofParser)
     }
+
+    /**
+     * If parsing is successful, returns a value.
+     * Otherwise, throws a [ParseException] containing an error.
+     */
+    fun parseEntireOrThrow(input: String): V {
+        return parseEntire(input).getOrThrow()
+    }
+
+    /**
+     * If parsing is successful, returns a value.
+     * Otherwise, throws a [ParseException] containing an error.
+     */
+    @Deprecated("Use `parseEntireOrThrow` instead", ReplaceWith("this.parseEntireOrThrow(input)"), DeprecationLevel.WARNING)
+    fun parseToEnd(input: String): V = parseEntireOrThrow(input)
 
     protected fun register(vararg tokens: Token) {
         tokens.forEach { registerToken(it) }

@@ -1,6 +1,7 @@
 package me.alllex.parsus.token
 
-import me.alllex.parsus.parser.ParseResult
+import me.alllex.parsus.parser.ParseError
+import me.alllex.parsus.parser.ParsedValue
 import me.alllex.parsus.parser.Parser
 import me.alllex.parsus.parser.ParsingScope
 
@@ -21,7 +22,12 @@ abstract class Token(
      */
     abstract fun match(input: CharSequence, fromIndex: Int): Int
 
-    override suspend fun ParsingScope.parse(): ParseResult<TokenMatch> = rawToken(this@Token)
+    override suspend fun ParsingScope.parse(): TokenMatch {
+        return when (val r = rawToken(this@Token)) {
+            is ParsedValue -> r.value
+            is ParseError -> fail(r)
+        }
+    }
 
     /**
      * List of characters that *can* be the first characters in this token's underlying pattern.

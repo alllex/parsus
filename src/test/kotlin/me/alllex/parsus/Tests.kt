@@ -165,7 +165,7 @@ class Tests {
         }.let { g ->
             assertThat(g.parseToEnd("a")).isEqualTo(g.a.lex(0))
             assertThat(g.parseToEnd("b")).isEqualTo(g.b.lex(0))
-            assertThat { g.parseToEnd("c") }.hasNoViableAlternative(0)
+            assertThat(g.parseEntire("c")).isEqualTo(NoViableAlternative(0))
         }
 
         object : Grammar<SyntaxTree?>() {
