@@ -32,8 +32,8 @@ allOpen.annotation("org.openjdk.jmh.annotations.State")
 benchmark {
     targets.register("main")
     configurations["main"].apply {
-        warmups = 5
-        iterations = 10
+        warmups = 3
+        iterations = 5
         outputTimeUnit = "s"
     }
 }
