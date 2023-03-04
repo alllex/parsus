@@ -2,11 +2,10 @@
 
 package me.alllex.parsus.demo
 
+import me.alllex.parsus.demo.BooleanExpression.*
+import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.regexToken
-import me.alllex.parsus.parser.*
-import me.alllex.parsus.demo.BooleanExpression.*
-import me.alllex.parsus.parser.Grammar
 
 sealed class BooleanExpression {
     object TRUE : BooleanExpression()
@@ -36,9 +35,9 @@ object BooleanGrammar : Grammar<BooleanExpression>() {
     val term: Parser<BooleanExpression> by
         (tru map TRUE) or (fal map FALSE) or (id map { Var(it.text) }) or negation or braced
 
-    val andChain by parser { leftAssociative(term, and) { a, _, b -> And(a, b) } }
-    val orChain by parser { leftAssociative(andChain, or) { a, _, b -> Or(a, b) } }
-    val implChain by parser { rightAssociative(orChain, impl) { a, _, b -> Impl(a, b) } }
+    val andChain by parser { reduce(term, and) { a, _, b -> And(a, b) } }
+    val orChain by parser { reduce(andChain, or) { a, _, b -> Or(a, b) } }
+    val implChain by parser { reduceRight(orChain, impl) { a, _, b -> Impl(a, b) } }
 
     val expr by implChain
     override val root by expr

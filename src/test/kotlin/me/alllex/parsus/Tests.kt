@@ -4,8 +4,8 @@ import assertk.Assert
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.*
-import me.alllex.parsus.token.*
 import me.alllex.parsus.parser.*
+import me.alllex.parsus.token.*
 import me.alllex.parsus.tree.*
 import org.junit.Test
 
@@ -141,7 +141,7 @@ class Tests {
         object : Grammar<SyntaxTree?>() {
             val a by literalToken("a")
             val ap = parser { lexeme(a) }
-            override val root = parser { zeroOrOne(ap) }
+            override val root = parser { poll(ap) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("a")).isEqualTo(g.a.lex(0))
             assertThat(g.parseEntireOrThrow("")).isNull()
@@ -155,7 +155,7 @@ class Tests {
             val c by literalToken("c")
             val pa = parser { lexeme(a) }
             val pb = parser { lexeme(b) }
-            override val root = parser { any(pa, pb) }
+            override val root = parser { choose(pa, pb) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("a")).isEqualTo(g.a.lex(0))
             assertThat(g.parseEntireOrThrow("b")).isEqualTo(g.b.lex(0))
@@ -167,7 +167,7 @@ class Tests {
             val b by literalToken("b")
             val pa = parser { lexeme(a) }
             val pb = parser { lexeme(b) }
-            override val root = parser { node(zeroOrOne(pa) + pb()) }
+            override val root = parser { node(poll(pa) + pb()) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("b")).isEqualTo(node(g.b))
             assertThat(g.parseEntireOrThrow("ab")).isEqualTo(node(g.a.lex(0), g.b.lex(1)))
@@ -181,7 +181,7 @@ class Tests {
             val b by literalToken("b")
             val ap = parser { lexeme(a) }
             val bp = parser { lexeme(b) }
-            override val root = parser { any(ap, bp) }
+            override val root = parser { choose(ap, bp) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("a")).isEqualTo(g.a.lex(0))
             assertThat(g.parseEntireOrThrow("b")).isEqualTo(g.b.lex(0))
@@ -193,7 +193,7 @@ class Tests {
             val c by literalToken("c")
             val ap = parser { lexeme(a) }
             val bp = parser { lexeme(b) }
-            override val root = parser { node(lexeme(c) + any(ap, bp) + lexeme(c)) }
+            override val root = parser { node(lexeme(c) + choose(ap, bp) + lexeme(c)) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("cac")).isEqualTo(
                 node(g.c.lex(0), g.a.lex(1), g.c.lex(2))
@@ -211,7 +211,7 @@ class Tests {
             val ap = parser { lexeme(a) }
             val bp = parser { lexeme(b) }
             val cp = parser { lexeme(c) }
-            val abcp = parser { any(ap, bp, cp) }
+            val abcp = parser { choose(ap, bp, cp) }
             override val root = parser { node(abcp() + abcp())}
         }.let { g ->
             assertThat(g.parseEntireOrThrow("ab")).isEqualTo(node(g.a, g.b))
@@ -226,7 +226,7 @@ class Tests {
             val b by literalToken("b")
             val p1 = parser { lexeme(a) }
             val p2 = parser { lexeme(b) }
-            override val root = parser { node(p1() + any(p1, p2) + p2()) }
+            override val root = parser { node(p1() + choose(p1, p2) + p2()) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("aab")).isEqualTo(node(g.a, g.a, g.b))
             assertThat(g.parseEntireOrThrow("abb")).isEqualTo(node(g.a, g.b, g.b))
@@ -239,8 +239,8 @@ class Tests {
             val p1 = parser { lexeme(a) }
             val p2 = parser { lexeme(b) }
             val p3 = parser { lexeme(c) }
-            val p4 = parser { any(p1, p2) }
-            override val root = parser { node(p1() + any(p3, p4)) }
+            val p4 = parser { choose(p1, p2) }
+            override val root = parser { node(p1() + choose(p3, p4)) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("ac")).isEqualTo(node(g.a, g.c))
             assertThat(g.parseEntireOrThrow("aa")).isEqualTo(node(g.a, g.a))
@@ -259,7 +259,7 @@ class Tests {
             val cp = parser { lexeme(c) }
             val abp = parser { node(ap(), bp()) }
             val acp = parser { node(ap(), cp()) }
-            override val root = parser { any(abp, acp) }
+            override val root = parser { choose(abp, acp) }
         }.run {
             assertThat(parseEntireOrThrow("ab")).isEqualTo(node(a, b))
             assertThat(parseEntireOrThrow("ac")).isEqualTo(node(a, c))
@@ -273,7 +273,7 @@ class Tests {
             val b by literalToken("b")
             val ap = parser { lexeme(a) }
             val ab = parser { lexeme(b) }
-            override val root = parser { node(zeroOrMore(ap) + ab()) }
+            override val root = parser { node(repeatZeroOrMore(ap) + ab()) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("b")).isEqualTo(node(g.b))
             assertThat(g.parseEntireOrThrow("ab")).isEqualTo(node(g.a, g.b))
@@ -289,7 +289,7 @@ class Tests {
             val b by literalToken("b")
             val ap = parser { lexeme(a) }
             val bp = parser { lexeme(b) }
-            override val root = parser { node(oneOrMore(ap) + bp()) }
+            override val root = parser { node(repeatOneOrMore(ap) + bp()) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("ab")).isEqualTo(node(g.a, g.b))
             assertThat(g.parseEntireOrThrow("aab")).isEqualTo(node(g.a, g.a, g.b))
@@ -304,7 +304,7 @@ class Tests {
             val b by literalToken("b")
             val ap = parser { lexeme(a) }
             val bp = parser { lexeme(b) }
-            override val root = parser { node(bp() + repeating(ap, 2, 3) + bp()) }
+            override val root = parser { node(bp() + repeat(ap, 2, 3) + bp()) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("baab")).isEqualTo(node(g.b, g.a, g.a, g.b))
             assertThat(g.parseEntireOrThrow("baaab")).isEqualTo(node(g.b, g.a, g.a, g.a, g.b))
@@ -317,7 +317,7 @@ class Tests {
             val b by literalToken("b")
             val ap = parser { lexeme(a) }
             val bp = parser { lexeme(b) }
-            override val root = parser { node(repeating(bp, 3) + repeating(ap, 2, 3) + bp()) }
+            override val root = parser { node(repeat(bp, 3) + repeat(ap, 2, 3) + bp()) }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("bbbbaab")).isEqualTo(node(g.b, g.b, g.b, g.b, g.a, g.a, g.b))
             assertThat(g.parseEntire("bbbbbab")).failedWithNotEnoughRepetition(5, 2, 1)
@@ -334,7 +334,7 @@ class Tests {
             val bp = parser { lexeme(b) }
             val abp = ap or bp
             override val root = parser {
-                leftAssociative<SyntaxTree, TokenMatch>(abp, s) { l, _, r -> node(l, r) }
+                reduce<SyntaxTree, TokenMatch>(abp, s) { l, _, r -> node(l, r) }
             }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("a")).isEqualTo(g.a.lex(0))
@@ -354,7 +354,7 @@ class Tests {
             val bp = parser { lexeme(b) }
             val abp = ap or bp
             override val root = parser {
-                rightAssociative<SyntaxTree, TokenMatch>(abp, s) { l, _, r -> node(l, r) }
+                reduceRight<SyntaxTree, TokenMatch>(abp, s) { l, _, r -> node(l, r) }
             }
         }.let { g ->
             assertThat(g.parseEntireOrThrow("a")).isEqualTo(g.a.lex(0))
@@ -375,10 +375,10 @@ class Tests {
             val andp = parser { lexeme(and) }
             val implp = parser { lexeme(impl) }
             val andChain by parser {
-                leftAssociative<SyntaxTree, Lexeme>(idp, andp) { l, op, r -> node(l, op, r) }
+                reduce<SyntaxTree, Lexeme>(idp, andp) { l, op, r -> node(l, op, r) }
             }
             val implChain by parser {
-                rightAssociative(andChain, implp) { l, op, r -> node(l, op, r) }
+                reduceRight(andChain, implp) { l, op, r -> node(l, op, r) }
             }
             override val root = implChain
         }.let { g ->

@@ -2,9 +2,9 @@
 
 package me.alllex.parsus.demo
 
+import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.regexToken
-import me.alllex.parsus.parser.*
 import kotlin.math.pow
 
 sealed class Expr {
@@ -40,23 +40,23 @@ object ExprParser : AbstractArithmeticGrammar<Expr>() {
     val const by number map { Expr.Con(it) }
 
     val term by parser {
-        val neg = !minus
-        val v = any(const, braced)
+        val neg = +minus
+        val v = choose(const, braced)
         if (neg) Expr.Neg(v) else v
     }
 
     val powExpr by parser {
-        leftAssociative(term, pow) { l, _, r -> Expr.Pow(l, r) }
+        reduce(term, pow) { l, _, r -> Expr.Pow(l, r) }
     }
 
     val mulExpr by parser {
-        leftAssociative(powExpr, times or div) { l, o, r ->
+        reduce(powExpr, times or div) { l, o, r ->
             if (o.token == times) Expr.Mul(l, r) else Expr.Div(l, r)
         }
     }
 
     val addExpr by parser {
-        leftAssociative(mulExpr, plus or minus) { l, o, r ->
+        reduce(mulExpr, plus or minus) { l, o, r ->
             if (o.token == plus) Expr.Add(l, r) else Expr.Sub(l, r)
         }
     }
@@ -69,25 +69,25 @@ object ExprCalculator : AbstractArithmeticGrammar<Int>() {
     val const by number
 
     val term by parser {
-        val neg = !minus
-        val v = any(const, braced)
+        val neg = +minus
+        val v = choose(const, braced)
         if (neg) -v else v
     }
 
     val powExpr by parser {
-        leftAssociative(term, pow) { l, _, r ->
+        reduce(term, pow) { l, _, r ->
             l.toDouble().pow(r.toDouble()).toInt()
         }
     }
 
     val mulExpr by parser {
-        leftAssociative(powExpr, times or div) { l, o, r ->
+        reduce(powExpr, times or div) { l, o, r ->
             if (o.token == times) l * r else l / r
         }
     }
 
     val addExpr by parser {
-        leftAssociative(mulExpr, plus or minus) { l, o, r ->
+        reduce(mulExpr, plus or minus) { l, o, r ->
             if (o.token == plus) l + r else l - r
         }
     }

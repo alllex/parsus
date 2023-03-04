@@ -10,7 +10,7 @@ package me.alllex.parsus.parser
  *  val term by id or (int map { it.text.toInt() })
  * ```
  */
-infix fun <R> Parser<R>.or(p: Parser<R>): Parser<R> = parser { any(this@or, p) }
+infix fun <R> Parser<R>.or(p: Parser<R>): Parser<R> = parser { choose(this@or, p) }
 
 /**
  * Applies given function to the result of [this] parser.
@@ -43,20 +43,24 @@ inline infix fun <T, R> Parser<T>.map(v: R): Parser<R> = map { v }
  * Returns the result of [the first parser][p1] if parsing succeeds,
  * otherwise returns the result of [the second parser][p2].
  */
-suspend fun <R> ParsingScope.any(p1: Parser<R>, p2: Parser<R>): R {
+suspend fun <R> ParsingScope.choose(p1: Parser<R>, p2: Parser<R>): R {
     val startOffset = currentOffset
-    val r1 = tryParse(p1)
-    if (r1 is ParsedValue) return r1.value
-
-    val r2 = tryParse(p2)
-    if (r2 is ParsedValue) return r2.value
-
-    fail(NoViableAlternative(startOffset))
+    return tryParse(p1).getOrElse {
+        tryParse(p2).getOrElse {
+            fail(NoViableAlternative(startOffset))
+        }
+    }
 }
 
-suspend fun <R> ParsingScope.any(p: Parser<R>, vararg ps: Parser<R>): R = any(p, ps.toList())
+@Deprecated("Use `choose` instead", ReplaceWith("this.choose(p1, p2)"), DeprecationLevel.WARNING)
+suspend fun <R> ParsingScope.any(p1: Parser<R>, p2: Parser<R>): R = choose(p1, p2)
 
-suspend fun <R> ParsingScope.any(p: Parser<R>, ps: List<Parser<R>>): R {
+suspend fun <R> ParsingScope.choose(p: Parser<R>, vararg ps: Parser<R>): R = choose(p, ps.toList())
+
+@Deprecated("Use `choose` instead", ReplaceWith("this.choose(p, ps)"), DeprecationLevel.WARNING)
+suspend fun <R> ParsingScope.any(p: Parser<R>, vararg ps: Parser<R>): R = choose(p, *ps)
+
+suspend fun <R> ParsingScope.choose(p: Parser<R>, ps: List<Parser<R>>): R {
     if (ps.isEmpty()) return p()
 
     val startOffset = this.currentOffset
@@ -69,25 +73,49 @@ suspend fun <R> ParsingScope.any(p: Parser<R>, ps: List<Parser<R>>): R {
     fail(NoViableAlternative(startOffset))
 }
 
+@Deprecated("Use `choose` instead", ReplaceWith("this.choose(p, ps)"), DeprecationLevel.WARNING)
+suspend fun <R> ParsingScope.any(p: Parser<R>, ps: List<Parser<R>>): R = choose(p, ps)
+
+suspend fun <R : Any> ParsingScope.tryOrNull(p: Parser<R>): R? = tryParse(p).getOrElse { null }
+
+suspend fun <R : Any> ParsingScope.poll(p: Parser<R>): R? = tryOrNull(p)
+
+@Deprecated("Use `poll` instead", ReplaceWith("this.poll(p)"), DeprecationLevel.WARNING)
 suspend fun <R : Any> ParsingScope.trying(p: Parser<R>): R? = tryParse(p).getOrElse { null }
 
 /**
  * Executes given parser, ignoring the result.
  */
-suspend fun ParsingScope.ignoring(p: Parser<*>): IgnoredValue {
+suspend fun ParsingScope.skip(p: Parser<*>): IgnoredValue {
     p() // execute parser, but ignore the result
     return IgnoredValue
 }
 
-suspend fun ParsingScope.having(p: Parser<Any>): Boolean = trying(p) != null
+@Deprecated("Use `skip` instead", ReplaceWith("this.skip(p)"), DeprecationLevel.WARNING)
+suspend inline fun ParsingScope.ignoring(p: Parser<*>): IgnoredValue = skip(p)
 
-suspend fun <R : Any> ParsingScope.zeroOrOne(p: Parser<R>): R? = trying(p)
+/**
+ * Returns true if the parser executes successfully and false otherwise.
+ */
+suspend fun ParsingScope.checkPresent(p: Parser<Any>): Boolean = tryOrNull(p) != null
 
-suspend fun <R : Any> ParsingScope.oneOrMore(p: Parser<R>): List<R> = repeating(p, atLeast = 1)
+@Deprecated("Use `checkPresent` instead", ReplaceWith("this.checkPresent(p)"), DeprecationLevel.WARNING)
+suspend fun ParsingScope.having(p: Parser<Any>): Boolean = checkPresent(p)
 
-suspend fun <R : Any> ParsingScope.zeroOrMore(p: Parser<R>): List<R> = repeating(p, atLeast = 0)
+@Deprecated("Use `poll` instead", ReplaceWith("this.poll(p)"), DeprecationLevel.WARNING)
+suspend fun <R : Any> ParsingScope.zeroOrOne(p: Parser<R>): R? = tryOrNull(p)
 
-suspend fun <R : Any> ParsingScope.repeating(p: Parser<R>, atLeast: Int, atMost: Int = -1): List<R> {
+suspend fun <R : Any> ParsingScope.repeatOneOrMore(p: Parser<R>): List<R> = repeat(p, atLeast = 1)
+
+@Deprecated("Use `repeatOneOrMore` instead", ReplaceWith("this.repeatOneOrMore(p)"), DeprecationLevel.WARNING)
+suspend fun <R : Any> ParsingScope.oneOrMore(p: Parser<R>): List<R> = repeatOneOrMore(p)
+
+suspend fun <R : Any> ParsingScope.repeatZeroOrMore(p: Parser<R>): List<R> = repeat(p, atLeast = 0)
+
+@Deprecated("Use `repeatZeroOrMore` instead", ReplaceWith("this.repeatZeroOrMore(p)"), DeprecationLevel.WARNING)
+suspend fun <R : Any> ParsingScope.zeroOrMore(p: Parser<R>): List<R> = repeatZeroOrMore(p)
+
+suspend fun <R : Any> ParsingScope.repeat(p: Parser<R>, atLeast: Int, atMost: Int = -1): List<R> {
     require(atLeast >= 0) { "atLeast must not be negative" }
     require(atMost == -1 || atLeast <= atMost) { "atMost has invalid value" }
 
@@ -95,7 +123,7 @@ suspend fun <R : Any> ParsingScope.repeating(p: Parser<R>, atLeast: Int, atMost:
     val results = mutableListOf<R>()
     var repetition = 0
     while (atMost == -1 || repetition < atMost) {
-        results += trying(p) ?: break
+        results += poll(p) ?: break
         repetition++
     }
 
@@ -103,36 +131,53 @@ suspend fun <R : Any> ParsingScope.repeating(p: Parser<R>, atLeast: Int, atMost:
     return results
 }
 
-suspend fun <T : Any> ParsingScope.separated(
+@Deprecated("Use `repeat` instead", ReplaceWith("this.repeat(p, atLeast, atMost)"), DeprecationLevel.WARNING)
+suspend fun <R : Any> ParsingScope.repeating(p: Parser<R>, atLeast: Int, atMost: Int = -1): List<R> = repeat(p, atLeast, atMost)
+
+suspend fun <T : Any> ParsingScope.split(
     term: Parser<T>,
     separator: Parser<Any>,
     allowEmpty: Boolean = true
 ): List<T> {
 
     val values = mutableListOf<T>()
-    values += if (!allowEmpty) term() else trying(term) ?: return emptyList()
+    values += if (!allowEmpty) term() else poll(term) ?: return emptyList()
     while (true) {
-        trying(separator) ?: break
+        poll(separator) ?: break
         values += term()
     }
     return values
 }
 
-suspend inline fun <T : Any, S : Any> ParsingScope.leftAssociative(
+@Deprecated("Use `split` instead", ReplaceWith("this.split(p)"), DeprecationLevel.WARNING)
+suspend fun <T : Any> ParsingScope.separated(
+    term: Parser<T>,
+    separator: Parser<Any>,
+    allowEmpty: Boolean = true
+): List<T> = split(term, separator, allowEmpty)
+
+suspend inline fun <T : Any, S : Any> ParsingScope.reduce(
     term: Parser<T>,
     operator: Parser<S>,
     transform: (T, S, T) -> T
 ): T {
     var l: T = term()
     while (true) {
-        val o = trying(operator) ?: break
+        val o = poll(operator) ?: break
         val r = term()
         l = transform(l, o, r)
     }
     return l
 }
 
-suspend inline fun <T : Any, S : Any> ParsingScope.rightAssociative(
+@Deprecated("Use `reduce` instead", ReplaceWith("this.reduce(term, operator, transform)"), DeprecationLevel.WARNING)
+suspend inline fun <T : Any, S : Any> ParsingScope.leftAssociative(
+    term: Parser<T>,
+    operator: Parser<S>,
+    transform: (T, S, T) -> T
+): T = reduce(term, operator, transform)
+
+suspend inline fun <T : Any, S : Any> ParsingScope.reduceRight(
     term: Parser<T>,
     operator: Parser<S>,
     transform: (T, S, T) -> T
@@ -140,7 +185,7 @@ suspend inline fun <T : Any, S : Any> ParsingScope.rightAssociative(
     val stack = mutableListOf<Pair<T, S>>()
     var t = term()
     while (true) {
-        val o = trying(operator) ?: break
+        val o = poll(operator) ?: break
         stack += t to o
         t = term()
     }
@@ -150,3 +195,10 @@ suspend inline fun <T : Any, S : Any> ParsingScope.rightAssociative(
     }
     return t
 }
+
+@Deprecated("Use `reduceRight` instead", ReplaceWith("this.reduceRight(term, operator, transform)"), DeprecationLevel.WARNING)
+suspend inline fun <T : Any, S : Any> ParsingScope.rightAssociative(
+    term: Parser<T>,
+    operator: Parser<S>,
+    transform: (T, S, T) -> T
+): T = reduceRight(term, operator, transform)

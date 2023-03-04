@@ -62,7 +62,10 @@ interface ParsingScope {
      */
     val TokenMatch.text: String
 
-    suspend operator fun Parser<*>.unaryMinus(): IgnoredValue = ignoring(this)
+    suspend operator fun Parser<*>.unaryMinus(): IgnoredValue = skip(this)
 
-    suspend operator fun Parser<Any>.not(): Boolean = having(this)
+    @Deprecated("Use `unaryPlus` instead", ReplaceWith("+this"), DeprecationLevel.WARNING)
+    suspend operator fun Parser<Any>.not(): Boolean = checkPresent(this)
+
+    suspend operator fun Parser<Any>.unaryPlus(): Boolean = checkPresent(this)
 }
