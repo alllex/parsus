@@ -18,13 +18,20 @@ data class ParsedValue<T>(val value: T) : ParseResult<T>()
  * Result of failed parsing.
  */
 abstract class ParseError : ParseResult<Nothing>() {
+    /**
+     * Offset in the input at which the parsing error occurred
+     */
+    abstract val offset: Int
+
     override fun toString(): String = "ParseError"
 }
 
-data class MismatchedToken(val expected: Token, val found: TokenMatch) : ParseError()
-data class NoMatchingToken(val offset: Int) : ParseError()
-data class NoViableAlternative(val offset: Int) : ParseError()
-data class NotEnoughRepetition(val offset: Int, val expectedAtLeast: Int, val actualCount: Int) : ParseError()
+data class MismatchedToken(val expected: Token, val found: TokenMatch) : ParseError() {
+    override val offset: Int get() = found.offset
+}
+data class NoMatchingToken(override val offset: Int) : ParseError()
+data class NoViableAlternative(override val offset: Int) : ParseError()
+data class NotEnoughRepetition(override val offset: Int, val expectedAtLeast: Int, val actualCount: Int) : ParseError()
 
 class ParseException(val error: ParseError) : Exception() {
     override fun toString(): String = "ParseException($error)"
