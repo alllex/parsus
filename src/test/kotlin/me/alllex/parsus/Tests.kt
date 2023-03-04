@@ -251,6 +251,24 @@ class Tests {
     }
 
     @Test
+    fun `Backtracking on mismatch`() {
+        object : Grammar<SyntaxTree>() {
+            val a by literalToken("a")
+            val b by literalToken("b")
+            val c by literalToken("c")
+            val ap = parser { lexeme(a) }
+            val bp = parser { lexeme(b) }
+            val cp = parser { lexeme(c) }
+            val abp = parser { node(ap(), bp()) }
+            val acp = parser { node(ap(), cp()) }
+            override val root = parser { any(abp, acp) }
+        }.run {
+            assertThat(parseToEnd("ab")).isEqualTo(node(a, b))
+            assertThat(parseToEnd("ac")).isEqualTo(node(a, c))
+        }
+    }
+
+    @Test
     fun `Zero or more`() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
@@ -294,6 +312,71 @@ class Tests {
             assertThat(g.parseToEnd("aaab")).isEqualTo(node(g.a, g.a, g.a, g.b))
             assertThat { g.parseToEnd("ab") }.hasNotEnoughRepetition(2, 1)
             assertThat { g.parseToEnd("aaaab") }.hasMismatchedToken(g.b, g.a, offset = 3)
+        }
+    }
+
+    @Test
+    fun `Left associative`() {
+        object : Grammar<SyntaxTree>() {
+            val s by literalToken(" ")
+            val a by literalToken("a")
+            val b by literalToken("b")
+            val ap = parser { lexeme(a) }
+            val bp = parser { lexeme(b) }
+            val abp = ap or bp
+            override val root = parser {
+                leftAssociative<SyntaxTree, TokenMatch>(abp, s) { l, _, r -> node(l, r) }
+            }
+        }.let { g ->
+            assertThat(g.parseToEnd("a")).isEqualTo(g.a.lex(0))
+            assertThat(g.parseToEnd("b")).isEqualTo(g.b.lex(0))
+            assertThat(g.parseToEnd("a b")).isEqualTo(node(g.a.lex(0), g.b.lex(2)))
+            assertThat(g.parseToEnd("a b a")).isEqualTo(node(node(g.a.lex(0), g.b.lex(2)), g.a.lex(4)))
+        }
+    }
+
+    @Test
+    fun `Right associative`() {
+        object : Grammar<SyntaxTree>() {
+            val s by literalToken(" ")
+            val a by literalToken("a")
+            val b by literalToken("b")
+            val ap = parser { lexeme(a) }
+            val bp = parser { lexeme(b) }
+            val abp = ap or bp
+            override val root = parser {
+                rightAssociative<SyntaxTree, TokenMatch>(abp, s) { l, _, r -> node(l, r) }
+            }
+        }.let { g ->
+            assertThat(g.parseToEnd("a")).isEqualTo(g.a.lex(0))
+            assertThat(g.parseToEnd("b")).isEqualTo(g.b.lex(0))
+            assertThat(g.parseToEnd("a b")).isEqualTo(node(g.a.lex(0), g.b.lex(2)))
+            assertThat(g.parseToEnd("a b a")).isEqualTo(node(g.a.lex(0), node(g.b.lex(2), g.a.lex(4))))
+        }
+    }
+
+    @Test
+    fun `Left and right associative`() {
+        object : Grammar<SyntaxTree>() {
+            val x by literalToken("x")
+            val y by literalToken("y")
+            val and by literalToken("&")
+            val impl by literalToken("->")
+            val idp = parser { lexeme(x) } or parser { lexeme(y) }
+            val andp = parser { lexeme(and) }
+            val implp = parser { lexeme(impl) }
+            val andChain by parser {
+                leftAssociative<SyntaxTree, Lexeme>(idp, andp) { l, op, r -> node(l, op, r) }
+            }
+            val implChain by parser {
+                rightAssociative(andChain, implp) { l, op, r -> node(l, op, r) }
+            }
+            override val root = implChain
+        }.let { g ->
+            assertThat(g.parseToEnd("x")).isEqualTo(g.x.lex(0))
+            assertThat(g.parseToEnd("x&y->y&x->x")).isEqualTo(with(g) {
+                node(node(x, and, y), impl.lex(3), node(node(y, and, x, startOffset = 5), impl.lex(8), x.lex(10)))
+            })
         }
     }
 
