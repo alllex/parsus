@@ -1,9 +1,6 @@
-@file:Suppress("DEPRECATION")
-
 package me.alllex.parsus
 
 import assertk.Assert
-import assertk.Result
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.*
@@ -51,17 +48,9 @@ class Tests {
             override val root = parser { lexeme(a) + lexeme(b) }
         }
 
-        assertThat {
-            g.parseEntireOrThrow("bb")
-        }.hasMismatchedToken(expected = g.a, actual = g.b, offset = 0)
-
-        assertThat {
-            g.parseEntireOrThrow("aa")
-        }.hasMismatchedToken(expected = g.b, actual = EofToken, offset = 2)
-
-        assertThat {
-            g.parseEntireOrThrow("aabbaa")
-        }.hasMismatchedToken(expected = EofToken, actual = g.a, offset = 4)
+        assertThat(g.parseEntire("bb")).failedWithTokenMismatch(expected = g.a, actual = g.b, offset = 0)
+        assertThat(g.parseEntire("aa")).failedWithTokenMismatch(expected = g.b, actual = EofToken, offset = 2)
+        assertThat(g.parseEntire("aabbaa")).failedWithTokenMismatch(expected = EofToken, actual = g.a, offset = 4)
     }
 
     @Test
@@ -98,11 +87,15 @@ class Tests {
                 if (sign) index++
 
                 val length = it.length
-                while (index < length && it[index].isDigit()) { index++ }
+                while (index < length && it[index].isDigit()) {
+                    index++
+                }
 
                 if (index < length && it[index] == '.') { // decimal
                     index++
-                    while (index < length && it[index].isDigit()) { index++ }
+                    while (index < length && it[index].isDigit()) {
+                        index++
+                    }
                 }
                 if (index == at || (index == at + 1 && sign)) return@token 0
                 index - at
@@ -157,6 +150,7 @@ class Tests {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
             val b by literalToken("b")
+
             @Suppress("unused")
             val c by literalToken("c")
             val pa = parser { lexeme(a) }
@@ -165,7 +159,7 @@ class Tests {
         }.let { g ->
             assertThat(g.parseEntireOrThrow("a")).isEqualTo(g.a.lex(0))
             assertThat(g.parseEntireOrThrow("b")).isEqualTo(g.b.lex(0))
-            assertThat(g.parseEntire("c")).isEqualTo(NoViableAlternative(0))
+            assertThat(g.parseEntire("c")).failedWith(NoViableAlternative(0))
         }
 
         object : Grammar<SyntaxTree?>() {
@@ -280,7 +274,7 @@ class Tests {
             assertThat(g.parseEntireOrThrow("b")).isEqualTo(node(g.b))
             assertThat(g.parseEntireOrThrow("ab")).isEqualTo(node(g.a, g.b))
             assertThat(g.parseEntireOrThrow("aab")).isEqualTo(node(g.a, g.a, g.b))
-            assertThat { g.parseEntireOrThrow("") }.hasMismatchedToken(g.b, EofToken, offset = 0)
+            assertThat(g.parseEntire("")).failedWithTokenMismatch(g.b, EofToken, offset = 0)
         }
     }
 
@@ -295,7 +289,7 @@ class Tests {
         }.let { g ->
             assertThat(g.parseEntireOrThrow("ab")).isEqualTo(node(g.a, g.b))
             assertThat(g.parseEntireOrThrow("aab")).isEqualTo(node(g.a, g.a, g.b))
-            assertThat { g.parseEntireOrThrow("b") }.hasNotEnoughRepetition(1, 0)
+            assertThat(g.parseEntire("b")).failedWithNotEnoughRepetition(1, 0)
         }
     }
 
@@ -310,8 +304,8 @@ class Tests {
         }.let { g ->
             assertThat(g.parseEntireOrThrow("aab")).isEqualTo(node(g.a, g.a, g.b))
             assertThat(g.parseEntireOrThrow("aaab")).isEqualTo(node(g.a, g.a, g.a, g.b))
-            assertThat { g.parseEntireOrThrow("ab") }.hasNotEnoughRepetition(2, 1)
-            assertThat { g.parseEntireOrThrow("aaaab") }.hasMismatchedToken(g.b, g.a, offset = 3)
+            assertThat(g.parseEntire("ab")).failedWithNotEnoughRepetition(2, 1)
+            assertThat(g.parseEntire("aaaab")).failedWithTokenMismatch(g.b, g.a, offset = 3)
         }
     }
 
@@ -406,29 +400,20 @@ class Tests {
             return Lexeme(TokenMatch(this, offset, text.length), text)
         }
 
-        private fun <T> Assert<Result<T>>.hasNotEnoughRepetition(
-            expectedAtLeast: Int,
-            actualCount: Int,
-        ) {
-            isFailure()
-                .isInstanceOf(ParseException::class)
-                .prop(ParseException::error)
-                .isInstanceOf(NotEnoughRepetition::class)
+        private fun <T> Assert<ParseResult<T>>.failedWith(parseError: ParseError) {
+            isEqualTo(parseError)
+        }
+
+        private fun <T> Assert<ParseResult<T>>.failedWithNotEnoughRepetition(expectedAtLeast: Int, actualCount: Int) {
+            isInstanceOf(NotEnoughRepetition::class)
                 .all {
                     prop(NotEnoughRepetition::expectedAtLeast).isEqualTo(expectedAtLeast)
                     prop(NotEnoughRepetition::actualCount).isEqualTo(actualCount)
                 }
         }
 
-        private fun <T> Assert<Result<T>>.hasMismatchedToken(
-            expected: Token,
-            actual: Token,
-            offset: Int,
-        ) {
-            isFailure()
-                .isInstanceOf(ParseException::class)
-                .prop(ParseException::error)
-                .isInstanceOf(MismatchedToken::class)
+        private fun <T> Assert<ParseResult<T>>.failedWithTokenMismatch(expected: Token, actual: Token, offset: Int) {
+            isInstanceOf(MismatchedToken::class)
                 .all {
                     prop("expected token", MismatchedToken::expected).isEqualTo(expected)
                     prop("actual lexeme", MismatchedToken::found).all {
