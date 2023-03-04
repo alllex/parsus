@@ -1,8 +1,5 @@
 package me.alllex.parsus.parser
 
-import me.alllex.parsus.token.Token
-import me.alllex.parsus.token.TokenMatch
-
 /**
  * Parser executes a procedure of converting a portion of input into a value.
  *
@@ -36,24 +33,6 @@ inline fun <T> parser(crossinline block: suspend ParsingScope.() -> T): Parser<T
 }
 
 /**
- * Result of a parse that is either a [parsed value][ParsedValue]
- * or an [error][ParseError].
- */
-sealed class ParseResult<out T>
-
-/**
- * Successful result of parsing.
- */
-data class ParsedValue<T>(val value: T) : ParseResult<T>()
-
-/**
- * Result of failed parsing.
- */
-abstract class ParseError : ParseResult<Nothing>() {
-    override fun toString(): String = "ParseError"
-}
-
-/**
  * Applies given function to the result of [this] parser.
  * ```kotlin
  *  val int by regexToken("\\d+")
@@ -79,22 +58,3 @@ inline infix fun <T, R> Parser<T>.map(crossinline f: ParsingScope.(T) -> R): Par
 @Suppress("NOTHING_TO_INLINE")
 inline infix fun <T, R> Parser<T>.map(v: R): Parser<R> = map { v }
 
-data class MismatchedToken(val expected: Token, val found: TokenMatch) : ParseError()
-
-data class NoMatchingToken(val fromIndex: Int) : ParseError()
-
-data class NoViableAlternative(val fromIndex: Int) : ParseError()
-
-data class NotEnoughRepetition(val expectedAtLeast: Int, val actualCount: Int) : ParseError()
-
-@Suppress("MemberVisibilityCanBePrivate")
-class ParseException(val error: ParseError) : Exception() {
-    override fun toString(): String = "ParseException($error)"
-}
-
-fun <T> ParseResult<T>.getOrThrow(): T {
-    return when (this) {
-        is ParsedValue -> value
-        is ParseError -> throw ParseException(this)
-    }
-}
