@@ -80,7 +80,7 @@ fun main() {
             "v5": { "such": ["json"] }
         }
     """.trimIndent()
-    val json = FasterJsonGrammar.parseToEnd(input)
+    val json = FasterJsonGrammar.parseEntireOrThrow(input)
     printJson(json)
 }
 
