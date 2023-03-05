@@ -3,6 +3,7 @@ package me.alllex.parsus.parser
 import me.alllex.parsus.token.Token
 import me.alllex.parsus.token.TokenMatch
 import kotlin.coroutines.Continuation
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.intrinsics.*
 
@@ -13,6 +14,7 @@ import kotlin.coroutines.intrinsics.*
  */
 internal class ParsingContext(
     private val lexer: Lexer,
+    private val debugMode: Boolean = false
 ) : ParsingScope {
 
     private var backtrackCont: Continuation<ParseError>? = null
@@ -21,7 +23,7 @@ internal class ParsingContext(
     private var result: Result<Any?> = PENDING_RESULT
 
     fun <T> runParser(parser: Parser<T>): ParseResult<T> {
-        withCont(createParserCoroutine(parser, continuingWith { parsedValue ->
+        withCont(createParserCoroutine(parser, continuingWith(debugName { "Root $parser" }) { parsedValue ->
             this.backtrackCont = null
             this.cont = null
             this.result = parsedValue.map(::ParsedValue)
@@ -71,7 +73,7 @@ internal class ParsingContext(
             val prevBacktrack = this.backtrackCont
             val curPosition = this.position
 
-            val backtrackRestoringCont = continuingWith<T> { parsedValue ->
+            val backtrackRestoringCont = continuingWith<T>(debugName { "Forward $parser" }) { parsedValue ->
                 // If no exceptions and `fail` is never called while `parser` runs we get here
                 this.backtrackCont = prevBacktrack
                 // do not restore position, as the input was processed
@@ -83,7 +85,7 @@ internal class ParsingContext(
             val newCont = createParserCoroutine(parser, backtrackRestoringCont)
 
             // backtrack path
-            val newBacktrack = continuingWith<ParseError> {
+            val newBacktrack = continuingWith<ParseError>(debugName { "Backtrack[$curPosition] $parser" }) {
                 // We get here if `fail` is called while `parser` runs
                 this.backtrackCont = prevBacktrack
                 this.position = curPosition
@@ -116,7 +118,12 @@ internal class ParsingContext(
     }
 
     private fun <T> createParserCoroutine(parser: Parser<T>, then: Continuation<T>): Continuation<Unit> {
-        val doParse: suspend ParsingScope.() -> T = { parser.run { parse() } }
+        val doParse: suspend ParsingScope.() -> T = {
+            parser.run {
+                parse()
+            }
+        }
+
         return doParse.createCoroutineUnintercepted(this, then)
     }
 
@@ -125,13 +132,27 @@ internal class ParsingContext(
         this.cont = continuation as Continuation<Any?>?
     }
 
+    private inline fun debugName(block: () -> String): String? {
+        return if (debugMode) block() else null
+    }
+
+    override fun toString(): String {
+        return "ParsingContext(position=$position, result=$result)"
+    }
+
     companion object {
         private val PENDING_RESULT = Result.success(COROUTINE_SUSPENDED)
 
         private inline fun <T> continuingWith(
+            debugName: String? = null,
             crossinline resumeWith: (Result<T>) -> Unit
         ): Continuation<T> {
-            return Continuation(EmptyCoroutineContext, resumeWith)
+            return if (debugName == null) Continuation(EmptyCoroutineContext, resumeWith)
+            else object : Continuation<T> {
+                override val context: CoroutineContext get() = EmptyCoroutineContext
+                override fun resumeWith(result: Result<T>) = resumeWith(result)
+                override fun toString(): String = debugName
+            }
         }
     }
 }

@@ -35,7 +35,9 @@ interface GrammarContext
  * }
  * ```
  */
-abstract class Grammar<out V> : GrammarContext {
+abstract class Grammar<out V>(
+    private val debugMode: Boolean = false,
+) : GrammarContext {
 
     private val _tokens = mutableListOf<Token>()
 
@@ -52,7 +54,7 @@ abstract class Grammar<out V> : GrammarContext {
      */
     fun parseEntire(input: String): ParseResult<V> {
         val lexer = Lexer(input, _tokens)
-        val parsingContext = ParsingContext(lexer)
+        val parsingContext = ParsingContext(lexer, debugMode)
         val untilEofParser = parser {
             val r = root()
             EofToken()
@@ -95,7 +97,12 @@ abstract class Grammar<out V> : GrammarContext {
 
     protected operator fun <T : Token> T.getValue(thisRef: Grammar<*>, property: KProperty<*>): T = this
 
-    protected operator fun <R> Parser<R>.provideDelegate(thisRef: Grammar<*>, property: KProperty<*>): Parser<R> = this
+    protected operator fun <R> Parser<R>.provideDelegate(thisRef: Grammar<*>, property: KProperty<*>): Parser<R> =
+        also {
+            if (it is ParserImpl && it.name == null) {
+                it.name = property.name
+            }
+        }
 
     protected operator fun <R> Parser<R>.getValue(thisRef: Grammar<*>, property: KProperty<*>): Parser<R> = this
 }

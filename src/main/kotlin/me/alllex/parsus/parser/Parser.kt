@@ -25,9 +25,27 @@ interface Parser<out T> {
     suspend fun ParsingScope.parse(): T
 }
 
+@PublishedApi
+internal abstract class ParserImpl<out T>(var name: String? = null) : Parser<T> {
+    override fun toString(): String = name ?: super.toString()
+}
+
 /**
  * Converts given [block] into a parser.
  */
-inline fun <T> parser(crossinline block: suspend ParsingScope.() -> T): Parser<T> = object : Parser<T> {
-    override suspend fun ParsingScope.parse(): T = block()
+inline fun <T> parser(
+    name: String,
+    crossinline block: suspend ParsingScope.() -> T
+): Parser<T> {
+    return object : ParserImpl<T>(name) {
+        override suspend fun ParsingScope.parse(): T = block()
+    }
+}
+
+inline fun <T> parser(
+    crossinline block: suspend ParsingScope.() -> T
+): Parser<T> {
+    return object : ParserImpl<T>() {
+        override suspend fun ParsingScope.parse(): T = block()
+    }
 }
