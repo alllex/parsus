@@ -157,7 +157,7 @@ suspend fun <T : Any> ParsingScope.split(
     return values
 }
 
-@Deprecated("Use `split` instead", ReplaceWith("this.split(p)"), DeprecationLevel.WARNING)
+@Deprecated("Use `split` instead", ReplaceWith("this.split(term, separator, allowEmpty)"), DeprecationLevel.WARNING)
 suspend fun <T : Any> ParsingScope.separated(
     term: Parser<T>,
     separator: Parser<Any>,

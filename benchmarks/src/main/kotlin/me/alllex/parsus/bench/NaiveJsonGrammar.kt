@@ -1,12 +1,15 @@
 package me.alllex.parsus.bench
 
+import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.regexToken
-import me.alllex.parsus.parser.*
 
 
 object NaiveJsonGrammar : Grammar<Json>() {
-    init { register(regexToken("\\s+", ignored = true)) }
+    init {
+        register(regexToken("\\s+", ignored = true))
+    }
+
     private val comma by literalToken(",")
     private val colon by literalToken(":")
     private val lbrace by literalToken("{")
@@ -26,10 +29,10 @@ object NaiveJsonGrammar : Grammar<Json>() {
 
     private val jsonObj by parser {
         val kv = parser { string() * -colon to jsonValue() }
-        -lbrace * (separated(kv, comma)) * -rbrace
+        -lbrace * (split(kv, comma)) * -rbrace
     } map { Json.Obj(it.toMap()) }
 
-    private val jsonArr by parser { -lbracket * separated(jsonValue, comma) * -rbracket } map { Json.Arr(it) }
+    private val jsonArr by parser { -lbracket * split(jsonValue, comma) * -rbracket } map { Json.Arr(it) }
     private val jsonValue: Parser<Json> by jsonNull or jsonBool or jsonNum or jsonStr or jsonArr or jsonObj
     override val root by jsonValue
 }

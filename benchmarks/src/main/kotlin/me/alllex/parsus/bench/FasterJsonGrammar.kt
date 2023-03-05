@@ -1,8 +1,8 @@
 package me.alllex.parsus.bench
 
+import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.token
-import me.alllex.parsus.parser.*
 
 
 object FasterJsonGrammar : Grammar<Json>() {
@@ -11,7 +11,9 @@ object FasterJsonGrammar : Grammar<Json>() {
     private val whiteSpace by token(ignored = true, firstChars = " \n\t") { it, at ->
         var index = at
         val length = it.length
-        while (index < length && it[index].isWhitespace()) { index++ }
+        while (index < length && it[index].isWhitespace()) {
+            index++
+        }
         index - at
     }
 
@@ -32,11 +34,15 @@ object FasterJsonGrammar : Grammar<Json>() {
         if (sign) index++
 
         val length = it.length
-        while (index < length && it[index].isDigit()) { index++ }
+        while (index < length && it[index].isDigit()) {
+            index++
+        }
 
         if (index < length && it[index] == '.') { // decimal
             index++
-            while (index < length && it[index].isDigit()) { index++ }
+            while (index < length && it[index].isDigit()) {
+                index++
+            }
         }
         if (index == at || (index == at + 1 && sign)) return@token 0
         index - at
@@ -63,9 +69,9 @@ object FasterJsonGrammar : Grammar<Json>() {
     private val jsonStr by string map { Json.Str(it) }
 
     private val kv = parser { string() * -colon to jsonValue() }
-    private val jsonObj by parser { -lbrace * (separated(kv, comma)) * -rbrace } map { Json.Obj(it.toMap()) }
+    private val jsonObj by parser { -lbrace * (split(kv, comma)) * -rbrace } map { Json.Obj(it.toMap()) }
 
-    private val jsonArr by parser { -lbracket * separated(jsonValue, comma) * -rbracket } map { Json.Arr(it) }
+    private val jsonArr by parser { -lbracket * split(jsonValue, comma) * -rbracket } map { Json.Arr(it) }
     private val jsonValue: Parser<Json> by jsonNull or jsonBool or jsonNum or jsonStr or jsonArr or jsonObj
     override val root by jsonValue
 }
