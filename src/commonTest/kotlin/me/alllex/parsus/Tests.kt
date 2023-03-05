@@ -4,6 +4,7 @@ import assertk.Assert
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.*
+import kotlin.js.JsName
 import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.*
 import me.alllex.parsus.tree.*
@@ -12,6 +13,7 @@ import kotlin.test.Test
 class Tests {
 
     @Test
+    @JsName("SingleLiteral")
     fun `Single literal`() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
@@ -24,6 +26,7 @@ class Tests {
     }
 
     @Test
+    @JsName("EmptyParser")
     fun `Empty parser`() {
         object : Grammar<Unit>() {
             override val root = parser {}
@@ -41,6 +44,7 @@ class Tests {
     }
 
     @Test
+    @JsName("TokenMismatch")
     fun `Token mismatch`() {
         val g = object : Grammar<SyntaxTree>() {
             val a by literalToken("aa")
@@ -54,6 +58,7 @@ class Tests {
     }
 
     @Test
+    @JsName("TwoLiteraltokens")
     fun `Two literal tokens`() {
         val g = object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
@@ -67,6 +72,7 @@ class Tests {
     }
 
     @Test
+    @JsName("RegexToken")
     fun `Regex token`() {
         val g = object : Grammar<SyntaxTree>() {
             val a by regexToken("a+b+")
@@ -78,6 +84,7 @@ class Tests {
     }
 
     @Test
+    @JsName("lambdaToken")
     fun `Lambda token`() {
         val g = object : Grammar<SyntaxTree>() {
             val numToken by token(firstChars = "+-0123456789.") { it, at ->
@@ -107,6 +114,7 @@ class Tests {
     }
 
     @Test
+    @JsName("NestedParsers")
     fun `Nested parsers`() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
@@ -137,6 +145,7 @@ class Tests {
     }
 
     @Test
+    @JsName("OptionalParser")
     fun `Optional parser`() {
         object : Grammar<SyntaxTree?>() {
             val a by literalToken("a")
@@ -175,6 +184,7 @@ class Tests {
     }
 
     @Test
+    @JsName("parsingAlternatives")
     fun `Parsing alternatives`() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
@@ -249,6 +259,7 @@ class Tests {
     }
 
     @Test
+    @JsName("BacktrackingOnMismatch")
     fun `Backtracking on mismatch`() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
@@ -267,6 +278,7 @@ class Tests {
     }
 
     @Test
+    @JsName("zeroOrMore")
     fun `Zero or more`() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
@@ -283,6 +295,7 @@ class Tests {
     }
 
     @Test
+    @JsName("oneOrMore")
     fun `One or more`() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
@@ -298,6 +311,7 @@ class Tests {
     }
 
     @Test
+    @JsName("repeatsInRange")
     fun `Repeats in range`() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
@@ -325,6 +339,7 @@ class Tests {
     }
 
     @Test
+    @JsName("leftAssociative")
     fun `Left associative`() {
         object : Grammar<SyntaxTree>() {
             val s by literalToken(" ")
@@ -345,6 +360,7 @@ class Tests {
     }
 
     @Test
+    @JsName("rightAssociative")
     fun `Right associative`() {
         object : Grammar<SyntaxTree>() {
             val s by literalToken(" ")
@@ -365,6 +381,7 @@ class Tests {
     }
 
     @Test
+    @JsName("leftAndRightAssociative")
     fun `Left and right associative`() {
         object : Grammar<SyntaxTree>() {
             val x by literalToken("x")
@@ -390,6 +407,7 @@ class Tests {
     }
 
     @Test
+    @JsName("betweenCombinator")
     fun `Between combinator`() {
         object : Grammar<SyntaxTree>() {
             val lp by literalToken("(")

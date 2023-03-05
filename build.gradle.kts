@@ -1,7 +1,8 @@
+import buildsrc.utils.nativeTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.10"
+    kotlin("multiplatform")
     signing
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
@@ -10,24 +11,34 @@ plugins {
 group = "me.alllex.parsus"
 version = "0.1.5-SNAPSHOT"
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    }
-}
+kotlin {
 
-dependencies {
-    testImplementation(kotlin("test"))
-    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
+  jvm()
+  jvmToolchain(8)
+
+  js(IR) {
+    browser()
+    nodejs()
+  }
+
+  nativeTarget()
+
+  sourceSets {
+    val commonMain by getting {}
+    val commonTest by getting {
+      dependencies {
+        implementation(kotlin("test"))
+        implementation("com.willowtreeapps.assertk:assertk:0.25")
+      }
+    }
+
+    val nativeMain by getting { dependsOn(commonMain) }
+    val nativeTest by getting { dependsOn(commonTest) }
+  }
 }
 
 repositories {
     mavenCentral()
-}
-
-java {
-    withJavadocJar()
-    withSourcesJar()
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -35,7 +46,7 @@ tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions.apiVersion = "1.7"
 }
 
-tasks.test {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
@@ -60,32 +71,28 @@ nexusPublishing {
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-
-            pom {
-                name.set("Parsus")
-                description.set("Composable parsers using Kotlin Coroutines")
+    publications.withType<MavenPublication>().configureEach {
+        pom {
+            name.set("Parsus")
+            description.set("Composable parsers using Kotlin Coroutines")
+            url.set("https://github.com/alllex/parsus")
+            licenses {
+                license {
+                    name.set("MIT")
+                    url.set("https://opensource.org/licenses/MIT")
+                }
+            }
+            developers {
+                developer {
+                    id.set("alllex")
+                    name.set("Aleksei Semin")
+                    email.set("alllexsm@gmail.com")
+                }
+            }
+            scm {
+                connection.set("scm:git:git@github.com:alllex/parsus.git")
+                developerConnection.set("scm:git:git@github.com:alllex/parsus.git")
                 url.set("https://github.com/alllex/parsus")
-                licenses {
-                    license {
-                        name.set("MIT")
-                        url.set("https://opensource.org/licenses/MIT")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("alllex")
-                        name.set("Aleksei Semin")
-                        email.set("alllexsm@gmail.com")
-                    }
-                }
-                scm {
-                    connection.set("scm:git:git@github.com:alllex/parsus.git")
-                    developerConnection.set("scm:git:git@github.com:alllex/parsus.git")
-                    url.set("https://github.com/alllex/parsus")
-                }
             }
         }
     }

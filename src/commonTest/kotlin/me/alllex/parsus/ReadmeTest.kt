@@ -10,7 +10,7 @@ import kotlin.test.Test
 class ReadmeTest {
 
     @Test
-    fun `Simplest grammar`() {
+    fun simplestGrammar() {
         val g1 = object : Grammar<String>() {
             val tokenA by literalToken("a")
             override val root by parser { tokenA().text }
