@@ -5,7 +5,7 @@ import assertk.assertions.isEqualTo
 import me.alllex.parsus.parser.Grammar
 import me.alllex.parsus.parser.parser
 import me.alllex.parsus.token.literalToken
-import org.junit.Test
+import kotlin.test.Test
 
 class ReadmeTest {
 

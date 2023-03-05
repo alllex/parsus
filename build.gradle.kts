@@ -15,7 +15,7 @@ java {
 }
 
 dependencies {
-    testImplementation(kotlin("test-junit"))
+    testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
 }
 
@@ -26,6 +26,10 @@ repositories {
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 signing {

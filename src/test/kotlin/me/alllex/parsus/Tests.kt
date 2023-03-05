@@ -7,7 +7,7 @@ import assertk.assertions.*
 import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.*
 import me.alllex.parsus.tree.*
-import org.junit.Test
+import kotlin.test.Test
 
 class Tests {
 

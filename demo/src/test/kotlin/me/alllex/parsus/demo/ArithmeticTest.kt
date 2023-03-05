@@ -1,8 +1,8 @@
 package me.alllex.parsus.demo
 
-import org.junit.Test
-import kotlin.test.assertEquals
 import me.alllex.parsus.demo.Expr.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class ArithmeticTest {
 

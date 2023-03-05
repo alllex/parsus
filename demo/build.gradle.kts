@@ -10,7 +10,11 @@ java {
 
 dependencies {
     implementation(rootProject)
-    testImplementation(kotlin("test-junit"))
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 repositories {

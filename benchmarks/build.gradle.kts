@@ -20,7 +20,6 @@ dependencies {
     implementation(rootProject)
     implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime-jvm:0.4.6")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
-    testImplementation(kotlin("test-junit"))
 }
 
 repositories {
