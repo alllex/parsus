@@ -16,7 +16,7 @@ java {
 
 dependencies {
     testImplementation(kotlin("test-junit"))
-    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.23.1")
+    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
 }
 
 repositories {
