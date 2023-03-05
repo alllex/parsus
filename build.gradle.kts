@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm") version "1.8.10"
     signing
@@ -10,7 +12,7 @@ version = "0.1.5-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(8))
     }
 }
 
@@ -26,6 +28,11 @@ repositories {
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions.languageVersion = "1.7"
+    kotlinOptions.apiVersion = "1.7"
 }
 
 tasks.test {
