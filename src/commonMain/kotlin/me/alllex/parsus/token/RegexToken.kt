@@ -46,7 +46,6 @@ class RegexToken(
     }
 }
 
-@Suppress("unused")
 fun GrammarContext.regexToken(
 //    @Language("RegExp") // TODO @Language replacement
     pattern: String,
@@ -61,11 +60,11 @@ fun GrammarContext.regexToken(
     ignored: Boolean = false
 ): RegexToken = RegexToken(regex, name, ignored)
 
-internal expect fun Regex.toMatcher() : RegexMatcher
-
-internal interface RegexMatcher {
-  fun reset(input: CharSequence): RegexMatcher
-  fun region(fromIndex: Int, length: Int)
-  fun find(): Boolean
-  fun end(): Int
-}
+//internal expect fun Regex.toMatcher() : RegexMatcher
+//
+//internal interface RegexMatcher {
+//  fun reset(input: CharSequence): RegexMatcher
+//  fun region(fromIndex: Int, length: Int)
+//  fun find(): Boolean
+//  fun end(): Int
+//}

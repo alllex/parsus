@@ -1,5 +1,5 @@
 package me.alllex.parsus.token
 
-internal actual fun Regex.toMatcher(): RegexMatcher {
-  TODO("Not yet implemented")
-}
+//internal actual fun Regex.toMatcher(): RegexMatcher {
+//  TODO("Not yet implemented")
+//}
