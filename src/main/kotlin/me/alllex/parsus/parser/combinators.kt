@@ -39,17 +39,25 @@ inline infix fun <T, R> Parser<T>.map(crossinline f: ParsingScope.(T) -> R): Par
 @Suppress("NOTHING_TO_INLINE")
 inline infix fun <T, R> Parser<T>.map(v: R): Parser<R> = map { v }
 
+fun <T> Parser<T>.between(left: Parser<*>, right: Parser<*>): Parser<T> = parser {
+    left()
+    val result = this@between()
+    right()
+    result
+}
+
 /**
  * Returns the result of [the first parser][p1] if parsing succeeds,
  * otherwise returns the result of [the second parser][p2].
  */
 suspend fun <R> ParsingScope.choose(p1: Parser<R>, p2: Parser<R>): R {
     val startOffset = currentOffset
-    return tryParse(p1).getOrElse {
-        tryParse(p2).getOrElse {
-            fail(NoViableAlternative(startOffset))
-        }
-    }
+    var r = tryParse(p1)
+    if (r is ParsedValue) return r.value
+
+    r = tryParse(p2)
+    if (r is ParsedValue) return r.value
+    fail(NoViableAlternative(startOffset))
 }
 
 @Deprecated("Use `choose` instead", ReplaceWith("this.choose(p1, p2)"), DeprecationLevel.WARNING)

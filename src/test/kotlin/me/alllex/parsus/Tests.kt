@@ -389,7 +389,27 @@ class Tests {
         }
     }
 
+    @Test
+    fun `Between combinator`() {
+        object : Grammar<SyntaxTree>() {
+            val lp by literalToken("(")
+            val rp by literalToken(")")
+            val a by literalToken("a")
+            val ap = parser { lexeme(a) }
+            val inPar = ap.between(lp, rp)
+            val atom = ap or inPar
+            override val root = parser { node(repeatOneOrMore(atom)) }
+        }.run {
+            assertParsed("aa").isEqualTo(node(a, a))
+            assertParsed("a(a)").isEqualTo(node(a.lex(0), a.lex(2)))
+            assertParsed("(a)a").isEqualTo(node(a.lex(1), a.lex(3)))
+            assertParsed("a(a)a").isEqualTo(node(a.lex(0), a.lex(2), a.lex(4)))
+        }
+    }
+
     companion object {
+
+        private fun <T> Grammar<T>.assertParsed(text: String): Assert<T> = assertThat(parseEntireOrThrow(text))
 
         private fun node(vararg literals: LiteralToken, startOffset: Int = 0): Node {
             var offset = startOffset
