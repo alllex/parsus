@@ -1,20 +1,10 @@
 plugins {
-    kotlin("jvm")
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    }
+    buildsrc.conventions.`kotlin-jvm`
 }
 
 dependencies {
-    implementation(rootProject)
+    implementation(projects.parsus)
     testImplementation(kotlin("test"))
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 repositories {

@@ -1,16 +1,16 @@
 rootProject.name = "buildSrc"
 
-@Suppress("UnstableApiUsage") // Central declaration of repositories is an incubating feature
+@Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
-  repositories {
-    mavenCentral()
-    gradlePluginPortal()
-  }
-
-  pluginManagement {
     repositories {
-      gradlePluginPortal()
-      mavenCentral()
+        mavenCentral()
+        gradlePluginPortal()
     }
-  }
+
+    pluginManagement {
+        repositories {
+            gradlePluginPortal()
+            mavenCentral()
+        }
+    }
 }

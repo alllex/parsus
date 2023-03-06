@@ -1,9 +1,9 @@
 plugins {
-  `kotlin-dsl`
+    `kotlin-dsl`
 }
 
 dependencies {
-  val kotlinVer = "1.8.10"
-  implementation(platform(kotlin("bom", kotlinVer)))
-  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVer")
+    val kotlinVer = "1.8.10"
+    implementation(platform(kotlin("bom", kotlinVer)))
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVer")
 }
