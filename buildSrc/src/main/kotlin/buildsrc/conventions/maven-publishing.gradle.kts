@@ -21,6 +21,13 @@ afterEvaluate {
 }
 
 publishing {
+    repositories {
+        maven(file("${rootDir}/build/maven-local-project")) {
+            // local repo, for easier publication testing
+            name = "LocalProject"
+        }
+    }
+
     publications.withType<MavenPublication>().configureEach {
         pom {
             name.set("Parsus")
