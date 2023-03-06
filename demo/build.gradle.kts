@@ -1,10 +1,32 @@
+import buildsrc.utils.nativeTarget
+
 plugins {
-    buildsrc.conventions.`kotlin-jvm`
+    buildsrc.conventions.`kotlin-multiplatform-base`
 }
 
-dependencies {
-    implementation(projects.parsus)
-    testImplementation(kotlin("test"))
+kotlin {
+    jvm()
+
+    js(IR) {
+        browser()
+        nodejs()
+    }
+
+    nativeTarget()
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(projects.parsus)
+            }
+        }
+
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+    }
 }
 
 repositories {
