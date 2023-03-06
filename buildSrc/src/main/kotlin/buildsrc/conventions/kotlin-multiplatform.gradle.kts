@@ -4,27 +4,28 @@ import buildsrc.utils.nativeTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  kotlin("multiplatform")
+    kotlin("multiplatform")
 }
 
 kotlin {
-  jvm()
-  jvmToolchain(8)
+    jvm()
+    jvmToolchain(8)
 
-  js(IR) {
-    browser()
-    nodejs()
-  }
+    js(IR) {
+        browser()
+        nodejs()
+    }
 
-  nativeTarget()
+    nativeTarget()
 
-  sourceSets {
-    val commonMain by getting
-    val commonTest by getting
+    @Suppress("UNUSED_VARIABLE")
+    sourceSets {
+        val commonMain by getting
+        val commonTest by getting
 
-    val nativeMain by getting { dependsOn(commonMain) }
-    val nativeTest by getting { dependsOn(commonTest) }
-  }
+        val nativeMain by getting { dependsOn(commonMain) }
+        val nativeTest by getting { dependsOn(commonTest) }
+    }
 }
 
 tasks.withType<KotlinCompile>().configureEach {
