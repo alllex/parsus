@@ -12,14 +12,14 @@ import org.jetbrains.kotlin.konan.target.KonanTarget
  * configured to extend the `commonMain` and `commonTest` source sets.
  */
 fun KotlinMultiplatformExtension.nativeTarget(
-  name: String = "native",
-  currentHost: KonanTarget = HostManager.host,
-  configure: KotlinNativeTargetWithHostTests.() -> Unit = { },
+    name: String = "native",
+    currentHost: KonanTarget = HostManager.host,
+    configure: KotlinNativeTargetWithHostTests.() -> Unit = { },
 ): KotlinNativeTargetWithHostTests {
-  return when (currentHost) {
-    KonanTarget.LINUX_X64 -> linuxX64(name, configure)
-    KonanTarget.MACOS_X64 -> macosX64(name, configure)
-    KonanTarget.MINGW_X64 -> mingwX64(name, configure)
-    else                  -> error("unsupported host '${currentHost.name}'")
-  }
+    return when (currentHost) {
+        KonanTarget.LINUX_X64 -> linuxX64(name, configure)
+        KonanTarget.MACOS_X64 -> macosX64(name, configure)
+        KonanTarget.MINGW_X64 -> mingwX64(name, configure)
+        else -> error("unsupported host '${currentHost.name}'")
+    }
 }
