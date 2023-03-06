@@ -13,8 +13,9 @@ class RegexToken(
 
     private val pattern: String = regex.pattern
     private val regex: Regex = prependPatternWithInputStart(pattern, regex.options)
-//    private val matcher: Matcher = this.regex.toPattern().matcher("")
-    //private val matcher: RegexMatcher = this.regex.toMatcher()
+
+    //    private val matcher: Matcher = this.regex.toPattern().matcher("")
+//    private val matcher: RegexMatcher = this.regex.toMatcher()
 
     private fun prependPatternWithInputStart(patternString: String, options: Set<RegexOption>): Regex {
         return if (patternString.startsWith(inputStartPrefix))
@@ -23,26 +24,21 @@ class RegexToken(
 //            val newlineAfterComments = if (RegexOption.COMMENTS in options) "\n" else ""
 //            val patternToEmbed = if (RegexOption.LITERAL in options) Regex.escape(patternString) else patternString
 //            ("$inputStartPrefix(?:$patternToEmbed$newlineAfterComments)").toRegex(options - RegexOption.LITERAL)
-          "$inputStartPrefix(?:$patternString)".toRegex(options)
-          // TODO is the warning correct?
-          //      > Unnecessary non-capturing group '(?:patternString)'
+            "$inputStartPrefix(?:$patternString)".toRegex(options)
+            // TODO is the warning correct?
+            //      > Unnecessary non-capturing group '(?:patternString)'
         }
     }
 
     override fun match(input: CharSequence, fromIndex: Int): Int {
-        val result = regex.find(input, fromIndex) ?: return 0
-        return result.range.last + 1
-
-        //matcher.reset(input).region(fromIndex, input.length)
-        //if (!matcher.find()) return 0
-        //val end = matcher.end()
-        //return  end - fromIndex
+        val match = regex.find(input.drop(fromIndex)) ?: return 0
+        return match.value.length
     }
 
     override fun toString(): String = "${name ?: ""} [$pattern]" + if (ignored) " [ignorable]" else ""
 
     companion object {
-        private const val inputStartPrefix = "" // "\\A" // TODO '\A' doesn't work on JS?
+        private const val inputStartPrefix = "^" // "\\A" // TODO '\A' doesn't work on JS?
     }
 }
 
@@ -60,11 +56,11 @@ fun GrammarContext.regexToken(
     ignored: Boolean = false
 ): RegexToken = RegexToken(regex, name, ignored)
 
-//internal expect fun Regex.toMatcher() : RegexMatcher
+//internal expect fun Regex.toMatcher(): RegexMatcher
 //
 //internal interface RegexMatcher {
-//  fun reset(input: CharSequence): RegexMatcher
-//  fun region(fromIndex: Int, length: Int)
-//  fun find(): Boolean
-//  fun end(): Int
+//    fun reset(input: CharSequence)
+//    fun region(start: Int, end: Int)
+//    fun find(): Boolean
+//    fun end(): Int
 //}

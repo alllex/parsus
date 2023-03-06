@@ -4,21 +4,21 @@ import java.util.regex.Matcher
 
 
 //internal actual fun Regex.toMatcher(): RegexMatcher =
-//  toPattern().matcher("").toRegexMatcher()
+//    RegexMatcherJvm(toPattern().matcher(""))
 //
 //
-//private fun Matcher.toRegexMatcher(): RegexMatcher {
-//  return object : RegexMatcher {
-//    private val matcher = this@toRegexMatcher
+//internal class RegexMatcherJvm(
+//    private val matcher: Matcher
+//) : RegexMatcher {
+//    override fun reset(input: CharSequence) {
+//        matcher.reset(input)
+//    }
 //
-//    override fun reset(input: CharSequence): RegexMatcher = matcher.reset(input).toRegexMatcher()
-//
-//    override fun region(fromIndex: Int, length: Int) {
-//      matcher.region(fromIndex, length)
+//    override fun region(start: Int, end: Int) {
+//        matcher.region(start, end)
 //    }
 //
 //    override fun find(): Boolean = matcher.find()
 //
 //    override fun end(): Int = matcher.end()
-//  }
 //}
