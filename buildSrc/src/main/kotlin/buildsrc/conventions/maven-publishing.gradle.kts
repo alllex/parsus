@@ -5,7 +5,10 @@ plugins {
     signing
 }
 
+// Gradle hasn't updated the signing plugin to be compatible with lazy-configuration, so it needs weird workarounds:
 afterEvaluate {
+    // Register signatures in afterEvaluate, otherwise the signing plugin creates the signing tasks
+    // too early, before all the publications are added.
     signing {
         val signingKey: String? by project
         val signingPassword: String? by project
