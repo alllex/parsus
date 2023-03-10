@@ -4,11 +4,11 @@ plugins {
     kotlin("jvm") version "1.8.10"
     signing
     `maven-publish`
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "1.2.0"
 }
 
 group = "me.alllex.parsus"
-version = "0.1.5-SNAPSHOT"
+version = "0.2.0-SNAPSHOT"
 
 java {
     toolchain {
@@ -40,14 +40,12 @@ tasks.test {
 }
 
 signing {
+    sign(publishing.publications)
+
+    val signingKeyId: String? by project
     val signingKey: String? by project
     val signingPassword: String? by project
-    val publishing: PublishingExtension by project
-
-    if (signingKey != null && signingPassword != null) {
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign(publishing.publications)
-    }
+    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
 }
 
 nexusPublishing {
@@ -77,8 +75,8 @@ publishing {
                 developers {
                     developer {
                         id.set("alllex")
-                        name.set("Aleksei Semin")
-                        email.set("alllexsm@gmail.com")
+                        name.set("Alex by Software")
+                        email.set("software@alllex.me")
                     }
                 }
                 scm {
