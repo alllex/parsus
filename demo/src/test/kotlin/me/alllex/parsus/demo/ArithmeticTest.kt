@@ -1,13 +1,15 @@
 package me.alllex.parsus.demo
 
-import me.alllex.parsus.demo.Expr.*
+import me.alllex.parsus.demo.math.Expr.*
+import me.alllex.parsus.demo.math.ExprCalculator
+import me.alllex.parsus.demo.math.ExprParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ArithmeticTest {
 
     @Test
-    fun `Expr parsing`() {
+    fun exprParsing() {
         assertEquals(
             actual = ExprParser.parseEntireOrThrow("-1 + 2 * 3 + 4 ^ 5 + 6 * (7 - 8)"),
             expected = Add(
@@ -24,7 +26,7 @@ class ArithmeticTest {
     }
 
     @Test
-    fun `Expr calculation`() {
+    fun exprCalculator() {
         assertEquals(
             actual = ExprCalculator.parseEntireOrThrow("-1 + 2 * 3 + 4 ^ 5 + 6 * (7 - 8)"),
             expected = 1023

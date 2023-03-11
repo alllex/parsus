@@ -1,6 +1,6 @@
-@file:Suppress("MemberVisibilityCanBePrivate")
+@file:Suppress("MemberVisibilityCanBePrivate", "PackageDirectoryMismatch")
 
-package me.alllex.parsus.demo
+package me.alllex.parsus.demo.math
 
 import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken

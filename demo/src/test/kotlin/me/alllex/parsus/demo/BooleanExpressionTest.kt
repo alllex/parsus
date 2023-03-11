@@ -1,13 +1,14 @@
 package me.alllex.parsus.demo
 
-import me.alllex.parsus.demo.BooleanExpression.*
+import me.alllex.parsus.demo.bool.BooleanExpression.*
+import me.alllex.parsus.demo.bool.BooleanGrammar
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class BooleanExpressionTest {
 
     @Test
-    fun `Boolean Expression parsing`() {
+    fun boolExprParsing() {
         assertEquals(
             actual = BooleanGrammar.parseEntireOrThrow("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a"),
             expected = Impl(
