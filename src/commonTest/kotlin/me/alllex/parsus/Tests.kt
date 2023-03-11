@@ -4,7 +4,6 @@ import assertk.Assert
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.*
-import kotlin.js.JsName
 import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.*
 import me.alllex.parsus.tree.*
