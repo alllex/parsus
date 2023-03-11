@@ -1,11 +1,11 @@
 plugins {
     buildsrc.conventions.`kotlin-multiplatform`
     buildsrc.conventions.`maven-publishing`
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "1.2.0"
 }
 
 group = "me.alllex.parsus"
-version = "0.1.5-SNAPSHOT"
+version = "0.2.1-SNAPSHOT"
 
 kotlin {
     sourceSets {

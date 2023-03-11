@@ -1,8 +1,8 @@
 @file:Suppress("MemberVisibilityCanBePrivate", "PackageDirectoryMismatch")
 
-package me.alllex.parsus.demo.boolean
+package me.alllex.parsus.demo.bool
 
-import me.alllex.parsus.demo.boolean.BooleanExpression.*
+import me.alllex.parsus.demo.bool.BooleanExpression.*
 import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.regexToken

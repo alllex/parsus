@@ -35,7 +35,7 @@ val ast = booleanGrammar.parseEntire("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> 
 
 ```kotlin
 dependencies {
-    implementation("me.alllex.parsus:parsus:0.1.4")
+    implementation("me.alllex.parsus:parsus:0.2.0")
 }
 ```
 
@@ -45,7 +45,7 @@ dependencies {
 <dependency>
   <groupId>me.alllex.parsus</groupId>
   <artifactId>parsus</artifactId>
-  <version>0.1.4</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 

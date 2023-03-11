@@ -10,11 +10,13 @@ afterEvaluate {
     // Register signatures in afterEvaluate, otherwise the signing plugin creates the signing tasks
     // too early, before all the publications are added.
     signing {
+        val signingKeyId: String? by project
         val signingKey: String? by project
         val signingPassword: String? by project
 
         if (signingKey != null && signingPassword != null) {
             useInMemoryPgpKeys(signingKey, signingPassword)
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
             sign(publishing.publications)
         }
     }
@@ -42,8 +44,8 @@ publishing {
             developers {
                 developer {
                     id.set("alllex")
-                    name.set("Aleksei Semin")
-                    email.set("alllexsm@gmail.com")
+                    name.set("Alex by Software")
+                    email.set("software@alllex.me")
                 }
             }
             scm {

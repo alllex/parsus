@@ -13,8 +13,7 @@ import kotlin.test.Test
 class Tests {
 
     @Test
-    @JsName("SingleLiteral")
-    fun `Single literal`() {
+    fun singleLiteral() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
             override val root = parser { lexeme(a) }
@@ -26,8 +25,7 @@ class Tests {
     }
 
     @Test
-    @JsName("EmptyParser")
-    fun `Empty parser`() {
+    fun emptyParser() {
         object : Grammar<Unit>() {
             override val root = parser {}
         }.let { g ->
@@ -44,8 +42,7 @@ class Tests {
     }
 
     @Test
-    @JsName("TokenMismatch")
-    fun `Token mismatch`() {
+    fun tokenMismatch() {
         val g = object : Grammar<SyntaxTree>() {
             val a by literalToken("aa")
             val b by literalToken("bb")
@@ -58,8 +55,7 @@ class Tests {
     }
 
     @Test
-    @JsName("TwoLiteraltokens")
-    fun `Two literal tokens`() {
+    fun twoLiteralTokens() {
         val g = object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
             val b by literalToken("b")
@@ -72,8 +68,7 @@ class Tests {
     }
 
     @Test
-    @JsName("RegexToken")
-    fun `Regex token`() {
+    fun regexToken() {
         val g = object : Grammar<SyntaxTree>() {
             val a by regexToken("a+b+")
             override val root = parser { lexeme(a) }
@@ -84,8 +79,7 @@ class Tests {
     }
 
     @Test
-    @JsName("lambdaToken")
-    fun `Lambda token`() {
+    fun lambdaToken() {
         val g = object : Grammar<SyntaxTree>() {
             val numToken by token(firstChars = "+-0123456789.") { it, at ->
                 var index = at
@@ -114,8 +108,7 @@ class Tests {
     }
 
     @Test
-    @JsName("NestedParsers")
-    fun `Nested parsers`() {
+    fun nestedParsers() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
             val b by literalToken("b")
@@ -145,8 +138,7 @@ class Tests {
     }
 
     @Test
-    @JsName("OptionalParser")
-    fun `Optional parser`() {
+    fun optionalParser() {
         object : Grammar<SyntaxTree?>() {
             val a by literalToken("a")
             val ap = parser { lexeme(a) }
@@ -184,8 +176,7 @@ class Tests {
     }
 
     @Test
-    @JsName("parsingAlternatives")
-    fun `Parsing alternatives`() {
+    fun parsingAlternatives() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
             val b by literalToken("b")
@@ -259,8 +250,7 @@ class Tests {
     }
 
     @Test
-    @JsName("BacktrackingOnMismatch")
-    fun `Backtracking on mismatch`() {
+    fun backtrackingOnMismatch() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
             val b by literalToken("b")
@@ -278,8 +268,7 @@ class Tests {
     }
 
     @Test
-    @JsName("zeroOrMore")
-    fun `Zero or more`() {
+    fun repeatZeroOrMore() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
             val b by literalToken("b")
@@ -295,8 +284,7 @@ class Tests {
     }
 
     @Test
-    @JsName("oneOrMore")
-    fun `One or more`() {
+    fun repeatOneOrMore() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
             val b by literalToken("b")
@@ -311,8 +299,7 @@ class Tests {
     }
 
     @Test
-    @JsName("repeatsInRange")
-    fun `Repeats in range`() {
+    fun repeatInRange() {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
             val b by literalToken("b")
@@ -339,8 +326,7 @@ class Tests {
     }
 
     @Test
-    @JsName("leftAssociative")
-    fun `Left associative`() {
+    fun reduce() {
         object : Grammar<SyntaxTree>() {
             val s by literalToken(" ")
             val a by literalToken("a")
@@ -360,8 +346,7 @@ class Tests {
     }
 
     @Test
-    @JsName("rightAssociative")
-    fun `Right associative`() {
+    fun reduceRight() {
         object : Grammar<SyntaxTree>() {
             val s by literalToken(" ")
             val a by literalToken("a")
@@ -381,8 +366,7 @@ class Tests {
     }
 
     @Test
-    @JsName("leftAndRightAssociative")
-    fun `Left and right associative`() {
+    fun reduceAndReduceRight() {
         object : Grammar<SyntaxTree>() {
             val x by literalToken("x")
             val y by literalToken("y")
@@ -407,8 +391,7 @@ class Tests {
     }
 
     @Test
-    @JsName("betweenCombinator")
-    fun `Between combinator`() {
+    fun betweenCombinator() {
         object : Grammar<SyntaxTree>() {
             val lp by literalToken("(")
             val rp by literalToken(")")
