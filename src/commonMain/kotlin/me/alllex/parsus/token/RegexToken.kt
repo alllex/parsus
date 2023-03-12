@@ -24,6 +24,8 @@ class RegexToken(
     override fun toString(): String = "${name ?: ""} [$pattern]" + if (ignored) " [ignorable]" else ""
 }
 
+// TODO: Add a @Language annotation to automatically highlight the pattern as a regex in the IDE
+//  see: https://github.com/kotest/kotest/pull/3397
 fun GrammarContext.regexToken(
     pattern: String,
     name: String? = null,
