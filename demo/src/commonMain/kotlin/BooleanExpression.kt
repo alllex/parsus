@@ -18,7 +18,7 @@ sealed class BooleanExpression {
 }
 
 object BooleanGrammar : Grammar<BooleanExpression>() {
-    init { register(regexToken("\\s+", ignored = true)) }
+    init { regexToken("\\s+", ignored = true) }
     val tru by literalToken("true")
     val fal by literalToken("false")
     val id by regexToken("\\w+")

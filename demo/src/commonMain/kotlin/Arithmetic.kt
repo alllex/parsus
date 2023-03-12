@@ -18,7 +18,7 @@ sealed class Expr {
 }
 
 abstract class AbstractArithmeticGrammar<T> : Grammar<T>() {
-    init { register(regexToken("\\s+", ignored = true)) }
+    init { regexToken("\\s+", ignored = true) }
     val lpar by literalToken("(")
     val rpar by literalToken(")")
     val pow by literalToken("^")
