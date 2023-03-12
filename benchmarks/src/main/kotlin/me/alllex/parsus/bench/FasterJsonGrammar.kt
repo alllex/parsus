@@ -4,17 +4,18 @@ import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.token
 
-
 object FasterJsonGrammar : Grammar<Json>() {
 
-    @Suppress("unused")
-    private val whiteSpace by token(ignored = true, firstChars = " \n\t") { it, at ->
-        var index = at
-        val length = it.length
-        while (index < length && it[index].isWhitespace()) {
-            index++
+    init {
+        // Ignored whitespace
+        token(ignored = true, firstChars = " \n\t") { it, at ->
+            var index = at
+            val length = it.length
+            while (index < length && it[index].isWhitespace()) {
+                index++
+            }
+            index - at
         }
-        index - at
     }
 
     private val comma by literalToken(",")
@@ -62,31 +63,16 @@ object FasterJsonGrammar : Grammar<Json>() {
         index + 1 - at
     }
 
-    private val string by stringToken map { it.text }
+    private val str by stringToken map { it.text.run { substring(1, length - 1) } }
     private val jsonNull by nullToken map Json.Null
     private val jsonBool by trueToken or falseToken map { Json.Bool(it.token == trueToken) }
     private val jsonNum by numToken map { Json.Num(it.text.toDouble()) }
-    private val jsonStr by string map { Json.Str(it) }
+    private val jsonStr by str map { Json.Str(it) }
 
-    private val kv = parser { string() * -colon to jsonValue() }
+    private val kv = parser { str() * -colon to jsonValue() }
     private val jsonObj by parser { -lbrace * (split(kv, comma)) * -rbrace } map { Json.Obj(it.toMap()) }
 
     private val jsonArr by parser { -lbracket * split(jsonValue, comma) * -rbracket } map { Json.Arr(it) }
     private val jsonValue: Parser<Json> by jsonNull or jsonBool or jsonNum or jsonStr or jsonArr or jsonObj
     override val root by jsonValue
 }
-
-fun main() {
-    val input = """
-        {
-            "v1": true,
-            "v2": null,
-            "v3": 42.0,
-            "v4": "wow",
-            "v5": { "such": ["json"] }
-        }
-    """.trimIndent()
-    val json = FasterJsonGrammar.parseEntireOrThrow(input)
-    printJson(json)
-}
-

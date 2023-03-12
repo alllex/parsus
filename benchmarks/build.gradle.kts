@@ -8,6 +8,7 @@ dependencies {
     implementation(projects.parsus)
     implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.6")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+    testImplementation(kotlin("test"))
 }
 
 repositories {

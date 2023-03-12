@@ -11,13 +11,14 @@ sealed class Json {
     data class Obj(val values: Map<String, Json>) : Json()
 }
 
-fun printJson(json: Json, indentInc: Int = 2) {
+fun jsonToString(json: Json, indentInc: Int = 2): String {
     fun StringBuilder.indent(count: Int) = repeat(count) { append(" ") }
+    fun StringBuilder.appendQuoted(s: String) = append('"').append(s).append('"')
     fun helper(j: Json, indent: Int, sb: StringBuilder) {
         when (j) {
             Json.Null -> sb.append("null")
             is Json.Bool -> sb.append(j.value)
-            is Json.Str -> sb.append(j.value)
+            is Json.Str -> sb.appendQuoted(j.value)
             is Json.Num -> {
                 val d = j.value
                 val l = d.roundToLong()
@@ -55,7 +56,7 @@ fun printJson(json: Json, indentInc: Int = 2) {
                         if (!first) sb.append(",")
                         sb.appendLine()
                         sb.indent(indent + indentInc)
-                        sb.append(key).append(": ")
+                        sb.appendQuoted(key).append(": ")
                         helper(value, indent + indentInc, sb)
                         first = false
                     }
@@ -69,6 +70,5 @@ fun printJson(json: Json, indentInc: Int = 2) {
 
     val sb = StringBuilder()
     helper(json, 0, sb)
-    val s = sb.toString()
-    println(s)
+    return sb.toString()
 }

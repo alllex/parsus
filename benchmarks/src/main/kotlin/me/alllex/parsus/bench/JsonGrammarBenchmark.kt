@@ -5,6 +5,7 @@ import kotlinx.benchmark.Blackhole
 import kotlinx.benchmark.Scope
 import kotlinx.benchmark.State
 import kotlinx.serialization.json.Json
+import me.alllex.parsus.bench.JsonSamples.jsonSample1K
 
 @Suppress("unused", "JSON_FORMAT_REDUNDANT_DEFAULT")
 @State(Scope.Benchmark)

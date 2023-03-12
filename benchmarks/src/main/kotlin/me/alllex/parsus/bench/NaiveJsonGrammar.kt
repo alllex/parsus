@@ -4,10 +4,9 @@ import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.regexToken
 
-
 object NaiveJsonGrammar : Grammar<Json>() {
     init {
-        register(regexToken("\\s+", ignored = true))
+        regexToken("\\s+", ignored = true)
     }
 
     private val comma by literalToken(",")
@@ -16,38 +15,17 @@ object NaiveJsonGrammar : Grammar<Json>() {
     private val rbrace by literalToken("}")
     private val lbracket by literalToken("[")
     private val rbracket by literalToken("]")
-    private val nullToken by literalToken("null")
-    private val trueToken by literalToken("true")
-    private val falseToken by literalToken("false")
-    private val numToken by regexToken("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?")
-    private val stringToken by regexToken("\"[^\\\\\"]*(\\\\[\"nrtbf\\\\][^\\\\\"]*)*\"")
-    private val string by stringToken map { it.text }
-    private val jsonNull by nullToken map Json.Null
-    private val jsonBool by trueToken or falseToken map { Json.Bool(it.token == trueToken) }
-    private val jsonNum by numToken map { Json.Num(it.text.toDouble()) }
-    private val jsonStr by string map { Json.Str(it) }
+    private val str by regexToken("\"[^\\\\\"]*(\\\\[\"nrtbf\\\\][^\\\\\"]*)*\"") map { it.text.run { substring(1, lastIndex) } }
+    private val jsonTrue by literalToken("true") map { Json.Bool(true) }
+    private val jsonFalse by literalToken("false") map { Json.Bool(false) }
+    private val jsonNull by literalToken("null") map Json.Null
+    private val jsonNum by regexToken("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?") map { Json.Num(it.text.toDouble()) }
+    private val jsonStr by str map { Json.Str(it) }
 
-    private val jsonObj by parser {
-        val kv = parser { string() * -colon to jsonValue() }
-        -lbrace * (split(kv, comma)) * -rbrace
-    } map { Json.Obj(it.toMap()) }
+    private val keyValue by parser { str() * -colon to jsonValue() }
+    private val jsonObj by parser { -lbrace * (split(keyValue, comma)) * -rbrace } map { Json.Obj(it.toMap()) }
 
     private val jsonArr by parser { -lbracket * split(jsonValue, comma) * -rbracket } map { Json.Arr(it) }
-    private val jsonValue: Parser<Json> by jsonNull or jsonBool or jsonNum or jsonStr or jsonArr or jsonObj
+    private val jsonValue: Parser<Json> by jsonNull or jsonTrue or jsonFalse or jsonNum or jsonStr or jsonArr or jsonObj
     override val root by jsonValue
 }
-
-fun main() {
-    val input = """
-        {
-            "v1": true,
-            "v2": null,
-            "v3": 42.0,
-            "v4": "wow",
-            "v5": { "such": ["json"] }
-        }
-    """.trimIndent()
-    val json = NaiveJsonGrammar.parseEntireOrThrow(input)
-    printJson(json)
-}
-
