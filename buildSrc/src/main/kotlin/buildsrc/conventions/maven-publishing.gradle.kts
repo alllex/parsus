@@ -10,13 +10,14 @@ afterEvaluate {
     // Register signatures in afterEvaluate, otherwise the signing plugin creates the signing tasks
     // too early, before all the publications are added.
     signing {
-        sign(publishing.publications)
-
         val signingKeyId: String? by project
         val signingKey: String? by project
         val signingPassword: String? by project
 
-        useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+        if (signingKeyId != null) {
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+            sign(publishing.publications)
+        }
     }
 }
 
