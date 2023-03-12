@@ -293,8 +293,8 @@ primitives.
 
 Here are some examples of grammars written with Parsus:
 
-* Arithmetic expression parser and calculator: [Arithmetic.kt](demo/src/main/kotlin/me/alllex/parsus/demo/Arithmetic.kt)
-* Boolean expression parser: [BooleanExpression.kt](demo/src/main/kotlin/me/alllex/parsus/demo/BooleanExpression.kt)
+* Arithmetic expression parser and calculator: [Arithmetic.kt](./demo/src/commonMain/kotlin/Arithmetic.kt)
+* Boolean expression parser: [BooleanExpression.kt](./demo/src/commonMain/kotlin/BooleanExpression.kt)
 * JSON parser: [(link)](benchmarks/src/main/kotlin/me/alllex/parsus/bench/NaiveJsonGrammar.kt)
 
 ## Coroutines

@@ -1,20 +1,32 @@
+import buildsrc.utils.nativeTarget
+
 plugins {
-    kotlin("jvm")
+    buildsrc.conventions.`kotlin-multiplatform-base`
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+kotlin {
+    jvm()
+
+    js(IR) {
+        browser()
+        nodejs()
     }
-}
 
-dependencies {
-    implementation(rootProject)
-    testImplementation(kotlin("test"))
-}
+    nativeTarget()
 
-tasks.test {
-    useJUnitPlatform()
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(projects.parsus)
+            }
+        }
+
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+    }
 }
 
 repositories {
