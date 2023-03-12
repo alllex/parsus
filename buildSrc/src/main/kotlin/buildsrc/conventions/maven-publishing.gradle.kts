@@ -38,6 +38,7 @@ publishing {
                     id.set("alllex")
                     name.set("Alex by Software")
                     email.set("software@alllex.me")
+                    url.set("https://alllex.me")
                 }
             }
             scm {
