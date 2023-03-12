@@ -296,6 +296,7 @@ Here are some examples of grammars written with Parsus:
 
 * Arithmetic expression parser and calculator: [Arithmetic.kt](./demo/src/commonMain/kotlin/Arithmetic.kt)
 * Boolean expression parser: [BooleanExpression.kt](./demo/src/commonMain/kotlin/BooleanExpression.kt)
+* S-expression parser: [SExpression.kt](./demo/src/commonMain/kotlin/SExpression.kt)
 * JSON parser: [(link)](benchmarks/src/main/kotlin/me/alllex/parsus/bench/NaiveJsonGrammar.kt)
 
 ## Coroutines
