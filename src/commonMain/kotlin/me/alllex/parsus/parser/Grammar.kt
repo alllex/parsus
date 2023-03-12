@@ -13,13 +13,13 @@ interface GrammarContext
  * Grammar defines all tokens that are expected to occur in the input
  * and the [root] parser which is used to [parse][parseEntire] the resulting value.
  *
- * The tokens must either be [registered][registerToken] manually or using a property-delegate with the `by` keyword.
+ * The tokens must either be [registered][register] manually or using a property-delegate with the `by` keyword.
  * Declaring parsers using `by` is also a preferred way as it allows to use them recursively.
  *
  * ```kotlin
  * // Grammar that parses sums of numbers: 1 + 4 + 2
  * object G : Grammar<Int>() {
- *     init { register(regexToken("\\s+", ignored = true)) }
+ *     init { regexToken("\\s+", ignored = true) }
  *     val lpar by literalToken("(")
  *     val rpar by literalToken(")")
  *     val plus by literalToken("+")
@@ -40,10 +40,11 @@ abstract class Grammar<out V>(
 ) : GrammarContext {
 
     private val _tokens = mutableListOf<Token>()
+    private var freezeTokens = false
 
     init {
         // important that it is the first
-        registerToken(EofToken)
+        register(EofToken)
     }
 
     abstract val root: Parser<V>
@@ -53,6 +54,7 @@ abstract class Grammar<out V>(
      * If parsing fails the result will be a [ParseError].
      */
     fun parseEntire(input: String): ParseResult<V> {
+        freezeTokens = true
         val lexer = Lexer(input, _tokens)
         val parsingContext = ParsingContext(lexer, debugMode)
         val untilEofParser = parser {
@@ -79,12 +81,25 @@ abstract class Grammar<out V>(
     @Deprecated("Use `parseEntireOrThrow` instead", ReplaceWith("this.parseEntireOrThrow(input)"), DeprecationLevel.WARNING)
     fun parseToEnd(input: String): V = parseEntireOrThrow(input)
 
-    protected fun register(vararg tokens: Token) {
-        tokens.forEach { registerToken(it) }
+    override fun toString(): String {
+        return "Grammar(${_tokens.size} tokens, root = $root)"
     }
 
-    protected fun registerToken(token: Token) {
+    /**
+     * Registers a token in the grammar.
+     *
+     * Tokens must be registered before parsing.
+     * Either register them as property delegates or in the init blocks.
+     */
+    fun register(token: Token) {
+        check(!freezeTokens) { "Tokens must be registered before parsing" }
+        check(token !in _tokens) { "Token $token is already registered" }
+
         _tokens += token
+    }
+
+    private fun checkRegistered(token: Token) {
+        check(token in _tokens) { "Token $token is not registered" }
     }
 
     protected operator fun <T : Token> T.provideDelegate(thisRef: Grammar<*>, property: KProperty<*>): T =
@@ -92,7 +107,7 @@ abstract class Grammar<out V>(
             if (it.name == null) {
                 it.name = property.name
             }
-            registerToken(it)
+            checkRegistered(it)
         }
 
     protected operator fun <T : Token> T.getValue(thisRef: Grammar<*>, property: KProperty<*>): T = this

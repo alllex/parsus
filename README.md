@@ -122,13 +122,13 @@ Another thing to note is that the member `tokenA` is declared via the `by` keywo
 property-delegation mechanism. When declaring tokens this way, they are automatically registred within a grammar, so
 they can participate in the matching process when parsing.
 
-Alternatively, the token could be registered explicitly. This could be useful, when we do not need to reference the
+Alternatively, the token could be registered anonymously. This could be useful, when we do not need to reference the
 token anywhere else when writing parsers. Most often, the tokens that need to be ignored are defined this way.
 
 ```kotlin
 val g2 = object : Grammar<String>() {
     init {
-        register(regexToken("\\s+", ignored = true))
+        regexToken("\\s+", ignored = true)
     }
 
     val tokenA by literalToken("a")
@@ -138,9 +138,10 @@ val g2 = object : Grammar<String>() {
 println(g2.parseEntireOrThrow(" a\t")) // prints "a"
 ```
 
-In this example we explicitly `register` a regex-token. This token will use the regular expression to match any
-whitespace in the input string. Since we want to simply ignore the whitespace, we will not reference this token in any
-of the parsers. Therefore, we register the token in the init-block of the class without assigning it to a member.
+In this example, we create a token by calling `regexToken`.
+This token will use the regular expression to match any whitespace in the input string.
+Since we want to simply ignore the whitespace, we will not reference this token in any of the parsers.
+Therefore, we register the token in the init-block of the class without assigning it to a member.
 
 Now, that we know how to declare and register different kinds of tokens, let us explore how to use those tokens to write
 parsers.

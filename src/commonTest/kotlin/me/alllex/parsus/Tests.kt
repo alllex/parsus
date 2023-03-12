@@ -207,7 +207,7 @@ class Tests {
             val a by literalToken("a")
             val b by literalToken("b")
             val c by literalToken("c")
-            init { registerToken(literalToken("d")) }
+            init { literalToken("d") }
             val ap = parser { lexeme(a) }
             val bp = parser { lexeme(b) }
             val cp = parser { lexeme(c) }

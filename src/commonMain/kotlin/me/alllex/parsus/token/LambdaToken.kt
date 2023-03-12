@@ -1,12 +1,13 @@
 package me.alllex.parsus.token
 
-import me.alllex.parsus.parser.GrammarContext
+import me.alllex.parsus.parser.Grammar
 
 /**
- * Most general form of a token, defined by a function that [matches] the input.
+ * Creates and registers a lambda token in this grammar.
+ *
+ * This is the most general form of a token, defined by a function that [matches][matcher] the input.
  */
-@Suppress("UnusedReceiverParameter")
-inline fun GrammarContext.token(
+inline fun Grammar<*>.token(
     name: String = "{lambda}",
     ignored: Boolean = false,
     firstChars: String = "",
@@ -15,6 +16,8 @@ inline fun GrammarContext.token(
     return object : Token(name, ignored) {
         override fun match(input: CharSequence, fromIndex: Int) = matcher(input, fromIndex)
         override val firstChars: String = firstChars
-        override fun toString() = name + if (ignored) " [ignorable]" else ""
+        override fun toString() = "LambdaToken($name${if (ignored) " [ignored]" else ""})"
+    }.also {
+        register(it)
     }
 }

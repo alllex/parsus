@@ -1,6 +1,6 @@
 package me.alllex.parsus.token
 
-import me.alllex.parsus.parser.GrammarContext
+import me.alllex.parsus.parser.Grammar
 
 /**
  * Most basic kind of token, represented as a constant [string] that is expected
@@ -28,9 +28,14 @@ class LiteralToken(
     override fun toString(): String = "LiteralToken('$string')"
 }
 
-@Suppress("UnusedReceiverParameter")
-fun GrammarContext.literalToken(
+/**
+ * Creates and registers a literal token in this grammar.
+ *
+ * This is the most basic form of a token, defined by a constant [text] that is expected
+ * to appear in the input.
+ */
+fun Grammar<*>.literalToken(
     text: String,
     name: String? = null,
     ignored: Boolean = false
-): LiteralToken = LiteralToken(text, name, ignored)
+): LiteralToken = LiteralToken(text, name, ignored).also { register(it) }
