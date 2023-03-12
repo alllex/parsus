@@ -1,10 +1,13 @@
 name: Gradle build
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+# Make the workflow manual for now
+on: workflow_dispatch
+
+#on:
+#  push:
+#    branches: [ main ]
+#  pull_request:
+#    branches: [ main ]
 
 jobs:
   gradle:
