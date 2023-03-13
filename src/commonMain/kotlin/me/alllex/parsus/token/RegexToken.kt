@@ -1,6 +1,7 @@
 package me.alllex.parsus.token
 
 import me.alllex.parsus.parser.Grammar
+import org.intellij.lang.annotations.Language
 
 /**
  * A token that [matches] the input using a [regex].
@@ -32,6 +33,7 @@ class RegexToken(
  * This token defined by a regular expression [pattern] that is expected to match the input.
  */
 fun Grammar<*>.regexToken(
+    @Language("RegExp", "", "")
     pattern: String,
     name: String? = null,
     ignored: Boolean = false
