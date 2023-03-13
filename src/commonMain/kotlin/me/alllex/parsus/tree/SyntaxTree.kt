@@ -1,10 +1,9 @@
 package me.alllex.parsus.tree
 
-import kotlin.jvm.JvmName
+import me.alllex.parsus.parser.ParsingScope
 import me.alllex.parsus.token.Token
 import me.alllex.parsus.token.TokenMatch
-import me.alllex.parsus.parser.ParsingScope
-
+import kotlin.jvm.JvmName
 
 /**
  * A syntax-tree consisting of [nodes][Node] and leaves represented as [lexemes][Lexeme].

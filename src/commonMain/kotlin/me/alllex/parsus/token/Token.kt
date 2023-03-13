@@ -32,7 +32,7 @@ abstract class Token(
      *
      * Lexer implementations can take advantage of this to match tokens more efficiently.
      */
-    open val firstChars: String = ""
+    open val firstChars: String get() = ""
 
     override fun toString(): String {
         if (name != null) return "Token($name)" + if (ignored) " [ignored]" else ""

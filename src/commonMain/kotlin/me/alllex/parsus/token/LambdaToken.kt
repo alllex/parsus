@@ -3,7 +3,7 @@ package me.alllex.parsus.token
 import me.alllex.parsus.parser.Grammar
 
 /**
- * Creates and registers a lambda token in this grammar.
+ * Creates and registers a function-defined token in this grammar.
  *
  * This is the most general form of a token, defined by a function that [matches][matcher] the input.
  */
