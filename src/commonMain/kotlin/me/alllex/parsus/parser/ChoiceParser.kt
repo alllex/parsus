@@ -9,21 +9,31 @@ internal class ChoiceParser<out T>(
     firstTokens = if (parsers.hasUnknownFirstTokens()) emptySet() else parsers.flatMap { it.firstTokens }.toSet()
 ) {
 
-    private val parsersByFirstToken: Map<Token, List<Parser<T>>>? =
-        if (parsers.hasUnknownFirstTokens()) null else mutableMapOf<Token, MutableList<Parser<T>>>()
+    private val parsersByFirstToken: Map<Token, List<Parser<T>>> =
+        mutableMapOf<Token, MutableList<Parser<T>>>()
             .apply {
+                val pendingUnknownFirstTokens = mutableListOf<Parser<T>>()
                 for (parser in parsers) {
-                    for (token in parser.firstTokens) {
-                        getOrPut(token) { mutableListOf() }.add(parser)
+                    if (parser.hasUnknownFirstTokens()) {
+                        values.forEach { it.add(parser) }
+                        pendingUnknownFirstTokens += parser
+                    } else {
+                        for (token in parser.firstTokens) {
+                            val parsersForToken = getOrPut(token) { mutableListOf() }
+                            if (parsersForToken.isEmpty()) {
+                                parsersForToken += pendingUnknownFirstTokens
+                            }
+                            parsersForToken.add(parser)
+                        }
                     }
                 }
             }
 
+    private val unknownFirstTokenParsers = parsers.filter { it.hasUnknownFirstTokens() }
+
     override suspend fun ParsingScope.parse(): T {
         val currentToken = currentToken?.token ?: fail(NoMatchingToken(currentOffset))
-        val parsers = if (parsersByFirstToken == null) parsers else {
-            parsersByFirstToken[currentToken] ?: fail(NoViableAlternative(currentOffset))
-        }
+        val parsers = parsersByFirstToken[currentToken] ?: unknownFirstTokenParsers
         for (parser in parsers) {
             val r = tryParse(parser)
             if (r is ParsedValue) return r.value
@@ -32,7 +42,8 @@ internal class ChoiceParser<out T>(
     }
 
     companion object {
-        private fun List<Parser<*>>.hasUnknownFirstTokens() = any { it.firstTokens.isEmpty() }
+        private fun Parser<*>.hasUnknownFirstTokens() = firstTokens.isEmpty()
+        private fun List<Parser<*>>.hasUnknownFirstTokens() = any { it.hasUnknownFirstTokens() }
     }
 }
 
