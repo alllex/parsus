@@ -31,7 +31,7 @@ object SExpressionGrammar : Grammar<SExpression>() {
 
     val atom by num or int or str or sym
     val listItems by parser { repeatZeroOrMore(sexpr) }
-    val list by listItems.between(lpar, rpar) map { SExpression.Lst(it) }
+    val list by -lpar * listItems * -rpar map { SExpression.Lst(it) }
     val sexpr: Parser<SExpression> by list or atom
 
     override val root by sexpr

@@ -407,6 +407,33 @@ class Tests {
         }
     }
 
+    @Test
+    fun recursiveParser() {
+        object : Grammar<SyntaxTree>() {
+            val lp by literalToken("(")
+            val rp by literalToken(")")
+            val a by literalToken("a")
+            val ap by parser { lexeme(a) }
+            val p: Parser<SyntaxTree> by ap or parser { -lp * p() * -rp }
+            override val root = p
+        }.run {
+            assertParsed("a").isEqualTo(a.lex(0))
+            assertParsed("((a))").isEqualTo(a.lex(2))
+        }
+
+        object : Grammar<SyntaxTree>() {
+            val lp by literalToken("(")
+            val rp by literalToken(")")
+            val a by literalToken("a")
+            val ap by parser { lexeme(a) }
+            val p: Parser<SyntaxTree> by ap or (-lp * ref(::p) * -rp)
+            override val root = p
+        }.run {
+            assertParsed("a").isEqualTo(a.lex(0))
+            assertParsed("((a))").isEqualTo(a.lex(2))
+        }
+    }
+
     companion object {
 
         private fun <T> Grammar<T>.assertParsed(text: String): Assert<T> = assertThat(parseEntireOrThrow(text))

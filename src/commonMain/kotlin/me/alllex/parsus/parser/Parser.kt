@@ -1,5 +1,7 @@
 package me.alllex.parsus.parser
 
+import kotlin.reflect.KProperty0
+
 /**
  * Parser executes a procedure of converting a portion of input into a value.
  *
@@ -47,5 +49,14 @@ inline fun <T> parser(
 ): Parser<T> {
     return object : ParserImpl<T>() {
         override suspend fun ParsingScope.parse(): T = block()
+    }
+}
+
+fun <T> ref(
+    parserProperty: KProperty0<Parser<T>>
+) : Parser<T> {
+    return object : ParserImpl<T>() {
+        override suspend fun ParsingScope.parse(): T = parserProperty().invoke()
+        override fun toString(): String = "ref(${parserProperty.name})"
     }
 }
