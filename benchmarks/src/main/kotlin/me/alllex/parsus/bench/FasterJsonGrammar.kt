@@ -70,7 +70,7 @@ object FasterJsonGrammar : Grammar<Json>() {
     private val jsonStr by str map { Json.Str(it) }
 
     private val kv = parser { str() * -colon to jsonValue() }
-    private val jsonObj by parser { -lbrace * (split(kv, comma)) * -rbrace } map { Json.Obj(it.toMap()) }
+    private val jsonObj by parser { -lbrace * split(kv, comma) * -rbrace } map { Json.Obj(it.toMap()) }
 
     private val jsonArr by parser { -lbracket * split(jsonValue, comma) * -rbracket } map { Json.Arr(it) }
     private val jsonValue: Parser<Json> by jsonNull or jsonBool or jsonNum or jsonStr or jsonArr or jsonObj

@@ -76,13 +76,6 @@ abstract class Grammar<out V>(
     }
 
     /**
-     * If parsing is successful, returns a value.
-     * Otherwise, throws a [ParseException] containing an error.
-     */
-    @Deprecated("Use `parseEntireOrThrow` instead", ReplaceWith("this.parseEntireOrThrow(input)"), DeprecationLevel.WARNING)
-    fun parseToEnd(input: String): V = parseEntireOrThrow(input)
-
-    /**
      * Creates a parser that runs the given parser, but always returns `Unit`.
      *
      * @see times

@@ -33,21 +33,6 @@ interface ParsingScope {
     fun tryParse(token: Token): ParseResult<TokenMatch>
 
     /**
-     * Runs the parser, returning wrapped result.
-     *
-     * If this or any underlying parser fails, execution is continued here
-     * with a wrapped [error][ParseError].
-     */
-    @Deprecated("Use `tryParse` instead", ReplaceWith("this.tryParse(p)"), DeprecationLevel.WARNING)
-    suspend fun <R> raw(p: Parser<R>): ParseResult<R> = tryParse(p)
-
-    /**
-     * Tries to parse given [token] at the current position in the input.
-     */
-    @Deprecated("Use `tryParse` instead", ReplaceWith("this.tryParse(token)"), DeprecationLevel.WARNING)
-    fun rawToken(token: Token): ParseResult<TokenMatch> = tryParse(token)
-
-    /**
      * Bails out with given [error], continuing execution at the next alternative.
      */
     suspend fun fail(error: ParseError): Nothing
@@ -63,9 +48,6 @@ interface ParsingScope {
     val TokenMatch.text: String
 
     suspend operator fun Parser<*>.unaryMinus(): IgnoredValue = skip(this)
-
-    @Deprecated("Use `unaryPlus` instead", ReplaceWith("+this"), DeprecationLevel.WARNING)
-    suspend operator fun Parser<Any>.not(): Boolean = checkPresent(this)
 
     suspend operator fun Parser<Any>.unaryPlus(): Boolean = checkPresent(this)
 }
