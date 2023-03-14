@@ -63,7 +63,7 @@ object FasterJsonGrammar : Grammar<Json>() {
         index + 1 - at
     }
 
-    private val str by stringToken map { it.text.run { substring(1, length - 1) } }
+    private val str by stringToken map { it.text.run { substring(1, lastIndex) } }
     private val jsonNull by nullToken map Json.Null
     private val jsonBool by trueToken or falseToken map { Json.Bool(it.token == trueToken) }
     private val jsonNum by numToken map { Json.Num(it.text.toDouble()) }
