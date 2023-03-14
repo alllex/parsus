@@ -69,14 +69,15 @@ suspend fun <R : Any> ParsingScope.repeat(p: Parser<R>, atLeast: Int, atMost: In
 suspend fun <T : Any> ParsingScope.split(
     term: Parser<T>,
     separator: Parser<Any>,
-    allowEmpty: Boolean = true
+    allowEmpty: Boolean = true,
+    trailingSeparator: Boolean = false,
 ): List<T> {
 
     val values = mutableListOf<T>()
     values += if (!allowEmpty) term() else poll(term) ?: return emptyList()
     while (true) {
         poll(separator) ?: break
-        values += term()
+        values += if (!trailingSeparator) term() else (poll(term) ?: break)
     }
     return values
 }

@@ -46,3 +46,64 @@ fun <T> Parser<T>.between(left: Parser<*>, right: Parser<*>): Parser<T> = parser
     right()
     result
 }
+
+fun <T : Any> optional(parser: Parser<T>): Parser<T?> = parser {
+    poll(parser)
+}
+
+fun <T : Any> repeated(p: Parser<T>, atLeast: Int, atMost: Int = -1): Parser<List<T>> =
+    parser(if (atLeast > 0) p.firstTokens else emptySet()) {
+        repeat(p, atLeast, atMost)
+    }
+
+fun <T : Any> zeroOrMore(p: Parser<T>) = repeated(p, atLeast = 0)
+
+fun <T : Any> oneOrMore(p: Parser<T>) = repeated(p, atLeast = 1)
+
+infix fun <T : Any> Int.times(parser: Parser<T>): Parser<List<T>> =
+    repeated(parser, atLeast = this, atMost = this)
+
+infix fun <T : Any> IntRange.times(parser: Parser<T>): Parser<List<T>> =
+    repeated(parser, atLeast = first, atMost = last)
+
+infix fun <T : Any> Int.timesOrMore(parser: Parser<T>): Parser<List<T>> = repeated(parser, atLeast = this)
+
+fun <T : Any, S : Any> separated(
+    term: Parser<T>,
+    separator: Parser<S>,
+    allowEmpty: Boolean = true,
+    trailingSeparator: Boolean = false,
+): Parser<List<T>> =
+    parser(if (!allowEmpty) term.firstTokens else emptySet()) {
+        split(term, separator, allowEmpty, trailingSeparator)
+    }
+
+fun <T : Any, S : Any> leftAssociative(
+    term: Parser<T>,
+    separator: Parser<S>,
+    transform: (T, S, T) -> T
+): Parser<T> =
+    parser(term.firstTokens) {
+        reduce(term, separator, transform)
+    }
+
+fun <T : Any, S : Any> leftAssociative(
+    term: Parser<T>,
+    separator: Parser<S>,
+    transform: (T, T) -> T
+): Parser<T> = leftAssociative(term, separator) { a, _, b -> transform(a, b) }
+
+fun <T : Any, S : Any> rightAssociative(
+    term: Parser<T>,
+    separator: Parser<S>,
+    transform: (T, S, T) -> T
+): Parser<T> =
+    parser(term.firstTokens) {
+        reduceRight(term, separator, transform)
+    }
+
+fun <T : Any, S : Any> rightAssociative(
+    term: Parser<T>,
+    separator: Parser<S>,
+    transform: (T, T) -> T
+): Parser<T> = rightAssociative(term, separator) { a, _, b -> transform(a, b) }

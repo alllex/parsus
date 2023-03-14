@@ -434,6 +434,23 @@ class Tests {
         }
     }
 
+    @Test
+    fun separated() {
+        object : Grammar<SyntaxTree>() {
+            val com by literalToken(",")
+            val a by literalToken("a")
+            val ap by parser { lexeme(a) }
+            val p: Parser<SyntaxTree> by separated(ap, com, trailingSeparator = true) map { node(it) }
+            override val root = p
+        }.run {
+            assertParsed("").isEqualTo(node())
+            assertParsed("a").isEqualTo(node(a))
+            assertParsed("a,").isEqualTo(node(a))
+            assertParsed("a,a").isEqualTo(node(a.lex(0), a.lex(2)))
+            assertParsed("a,a,").isEqualTo(node(a.lex(0), a.lex(2)))
+        }
+    }
+
     companion object {
 
         private fun <T> Grammar<T>.assertParsed(text: String): Assert<T> = assertThat(parseEntireOrThrow(text))
