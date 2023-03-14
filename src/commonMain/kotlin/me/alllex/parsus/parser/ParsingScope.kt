@@ -43,6 +43,11 @@ interface ParsingScope {
     val currentOffset: Int
 
     /**
+     * The token at the current offset in the input.
+     */
+    val currentToken: TokenMatch?
+
+    /**
      * Extracts the text corresponding to the token match from the input.
      */
     val TokenMatch.text: String

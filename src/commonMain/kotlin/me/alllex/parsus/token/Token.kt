@@ -27,6 +27,9 @@ abstract class Token(
         return tryParse(this@Token).getOrElse { fail(it) }
     }
 
+    @Suppress("LeakingThis")
+    override val firstTokens: Set<Token> = setOf(this)
+
     /**
      * List of characters that *can* be the first characters in this token's underlying pattern.
      *

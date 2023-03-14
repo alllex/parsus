@@ -22,10 +22,10 @@ object NaiveJsonGrammar : Grammar<Json>() {
     private val jsonNum by regexToken("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?") map { Json.Num(it.text.toDouble()) }
     private val jsonStr by str map { Json.Str(it) }
 
-    private val keyValue by parser { str() * -colon to jsonValue() }
-    private val jsonObj by parser { -lbrace * (split(keyValue, comma)) * -rbrace } map { Json.Obj(it.toMap()) }
+    private val keyValue by str * -colon and ref(::jsonValue)
+    private val jsonObj by -lbrace * parser { split(keyValue, comma) } * -rbrace map { Json.Obj(it.toMap()) }
 
-    private val jsonArr by parser { -lbracket * split(jsonValue, comma) * -rbracket } map { Json.Arr(it) }
+    private val jsonArr by -lbracket * parser { split(jsonValue, comma) } * -rbracket map { Json.Arr(it) }
     private val jsonValue: Parser<Json> by jsonNull or jsonTrue or jsonFalse or jsonNum or jsonStr or jsonArr or jsonObj
     override val root by jsonValue
 }

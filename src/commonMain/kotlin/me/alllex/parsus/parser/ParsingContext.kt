@@ -39,6 +39,9 @@ internal class ParsingContext(
 
     override val currentOffset: Int get() = position
 
+    override val currentToken: TokenMatch?
+        get() = lexer.findMatch(position)
+
     override suspend fun <R> Parser<R>.invoke(): R = parse()
 
     override suspend fun <R> tryParse(p: Parser<R>): ParseResult<R> {

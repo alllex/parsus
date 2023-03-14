@@ -86,7 +86,7 @@ abstract class Grammar<out V>(
      * Creates a parser that ignores the result of the first parser and returns the result of the second parser.
      */
     @JvmName("ignoredTimesParser")
-    operator fun <T> Parser<Unit>.times(p: Parser<T>): Parser<T> = parser {
+    operator fun <T> Parser<Unit>.times(p: Parser<T>): Parser<T> = parser(firstTokens) {
         this@times()
         p()
     }
@@ -95,7 +95,7 @@ abstract class Grammar<out V>(
      * Creates a parser that runs both parsers, but only returns the result of the first parser.
      */
     @JvmName("parserTimesIgnored")
-    operator fun <T> Parser<T>.times(ignored: Parser<Unit>): Parser<T> = parser {
+    operator fun <T> Parser<T>.times(ignored: Parser<Unit>): Parser<T> = parser(firstTokens) {
         this@times().also {
             ignored()
         }
