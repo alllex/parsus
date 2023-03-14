@@ -78,32 +78,32 @@ fun <T : Any, S : Any> separated(
         split(term, separator, allowEmpty, trailingSeparator)
     }
 
-fun <T : Any, S : Any> leftAssociative(
+inline fun <T : Any, S : Any> leftAssociative(
     term: Parser<T>,
     separator: Parser<S>,
-    transform: (T, S, T) -> T
+    crossinline transform: (T, S, T) -> T
 ): Parser<T> =
     parser(term.firstTokens) {
         reduce(term, separator, transform)
     }
 
-fun <T : Any, S : Any> leftAssociative(
+inline fun <T : Any, S : Any> leftAssociative(
     term: Parser<T>,
     separator: Parser<S>,
-    transform: (T, T) -> T
+    crossinline transform: (T, T) -> T
 ): Parser<T> = leftAssociative(term, separator) { a, _, b -> transform(a, b) }
 
-fun <T : Any, S : Any> rightAssociative(
+inline fun <T : Any, S : Any> rightAssociative(
     term: Parser<T>,
     separator: Parser<S>,
-    transform: (T, S, T) -> T
+    crossinline transform: (T, S, T) -> T
 ): Parser<T> =
     parser(term.firstTokens) {
         reduceRight(term, separator, transform)
     }
 
-fun <T : Any, S : Any> rightAssociative(
+inline fun <T : Any, S : Any> rightAssociative(
     term: Parser<T>,
     separator: Parser<S>,
-    transform: (T, T) -> T
+    crossinline transform: (T, T) -> T
 ): Parser<T> = rightAssociative(term, separator) { a, _, b -> transform(a, b) }
