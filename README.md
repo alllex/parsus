@@ -4,11 +4,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Gradle build](https://github.com/alllex/parsus/actions/workflows/gradle.yml/badge.svg)](https://github.com/alllex/parsus/actions/workflows/gradle.yml)
 
-A framework for writing composable parsers based on Kotlin Coroutines.
+A framework for writing composable parsers for JVM, JS and Kotlin/Native based on Kotlin Coroutines.
 
 ```kotlin
-val booleanGrammar = object : Grammar<BooleanExpression>() {
-    val ws by regexToken("\\s+", ignored = true)
+val booleanGrammar = object : Grammar<Expr>() {
+    init { regexToken("\\s+", ignored = true) }
     val id by regexToken("\\w+")
     val lpar by literalToken("(")
     val rpar by literalToken(")")
@@ -17,14 +17,15 @@ val booleanGrammar = object : Grammar<BooleanExpression>() {
     val or by literalToken("|")
     val impl by literalToken("->")
 
-    val term: Parser<BooleanExpression> by
-        (id map { Var(it.text) }) or
-                parser { Not(-not * term()) } or
-                parser { -lpar * root() * -rpar }
+    val negation by -not * ref(::term) map { Not(it) }
+    val braced by -lpar * ref(::root) * -rpar
 
-    val andChain by parser { leftAssociative(term, and) { a, _, b -> And(a, b) } }
-    val orChain by parser { leftAssociative(andChain, or) { a, _, b -> Or(a, b) } }
-    val implChain by parser { rightAssociative(orChain, impl) { a, _, b -> Impl(a, b) } }
+    val term: Parser<Expr> by (id map { Var(it.text) }) or negation or braced
+
+    val andChain by leftAssociative(term, and, ::And)
+    val orChain by leftAssociative(andChain, or, ::Or)
+    val implChain by rightAssociative(orChain, impl, ::Impl)
+
     override val root by implChain
 }
 
@@ -248,7 +249,7 @@ point. Even in the case when the first parser fails, the parent parser does not 
 the parent parser tries out the remaining alternatives. If there is one alternative that succeeds, the parent parser
 takes its result and proceeds without any errors.
 
-We can use the `any` function from the `ParsingScope` to achieve this behaviour:
+We can use the `choose` function from the `ParsingScope` to achieve this behaviour:
 
 ```kotlin
 val g5 = object : Grammar<String>() {
@@ -256,9 +257,9 @@ val g5 = object : Grammar<String>() {
     val tokenId by regexToken("[a-z]+")
     val tokenPlus by literalToken("+")
     override val root by parser {
-        val idOrNum1 = any(tokenNum, tokenId).text
+        val idOrNum1 = choose(tokenNum, tokenId).text
         tokenPlus()
-        val idOrNum2 = any(tokenNum, tokenId).text
+        val idOrNum2 = choose(tokenNum, tokenId).text
         "($idOrNum1) + ($idOrNum2)"
     }
 }
@@ -275,7 +276,7 @@ val g6 = object : Grammar<String>() {
     val tokenNum by regexToken("[0-9]+")
     val tokenId by regexToken("[a-z]+")
     val tokenPlus by literalToken("+")
-    val term by parser { any(tokenNum, tokenId).text }
+    val term by parser { choose(tokenNum, tokenId).text }
     override val root by parser {
         val idOrNum1 = term()
         tokenPlus()
