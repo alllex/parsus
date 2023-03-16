@@ -32,21 +32,23 @@ val booleanGrammar = object : Grammar<Expr>() {
 val ast = booleanGrammar.parseEntire("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a").getOrThrow()
 ```
 
-### Using with Gradle
+## Usage
+
+Using with Gradle:
 
 ```kotlin
 dependencies {
-    implementation("me.alllex.parsus:parsus-jvm:0.3.0")
+    implementation("me.alllex.parsus:parsus-jvm:0.4.0")
 }
 ```
 
-### Using with Maven
+Using with Maven:
 
 ```xml
 <dependency>
   <groupId>me.alllex.parsus</groupId>
   <artifactId>parsus-jvm</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
 </dependency>
 ```
 
