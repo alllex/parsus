@@ -25,8 +25,6 @@ class RegexToken(
     override fun toString(): String = "RegexToken(${name ?: ""} [$pattern]${if (ignored) " [ignored]" else ""})"
 }
 
-// TODO: Add a @Language annotation to automatically highlight the pattern as a regex in the IDE
-//  see: https://github.com/kotest/kotest/pull/3397
 /**
  * Creates and registers a regex token in this grammar.
  *
