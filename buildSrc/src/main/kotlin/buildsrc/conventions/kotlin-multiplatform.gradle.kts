@@ -16,7 +16,7 @@ kotlin {
 
     linuxX64()
 
-//    mingwX64() // TODO find a workaround/replacement for AssertK missing a mingw variant
+    mingwX64()
 
     macosX64()
     macosArm64()
@@ -50,9 +50,9 @@ kotlin {
         val linuxX64Main by getting { dependsOn(nativeMain) }
         val linuxX64Test by getting { dependsOn(nativeTest) }
 
-//        // Windows - MinGW
-//        val mingwX64Main by getting { dependsOn(nativeMain) }
-//        val mingwX64Test by getting { dependsOn(nativeTest) }
+        // Windows - MinGW
+        val mingwX64Main by getting { dependsOn(nativeMain) }
+        val mingwX64Test by getting { dependsOn(nativeTest) }
 
         // Apple - macOS
         val macosArm64Main by getting { dependsOn(nativeMain) }
