@@ -1,13 +1,13 @@
 plugins {
     buildsrc.conventions.`kotlin-jvm`
-    kotlin("plugin.allopen") version "1.8.10"
-    id("org.jetbrains.kotlinx.benchmark") version "0.4.6"
+    kotlin("plugin.allopen")
+    id("org.jetbrains.kotlinx.benchmark")
 }
 
 dependencies {
     implementation(projects.parsus)
-    implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.6")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.8")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     testImplementation(kotlin("test"))
 }
 
