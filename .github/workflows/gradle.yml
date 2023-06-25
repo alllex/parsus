@@ -1,25 +1,39 @@
 name: Gradle build
 
 on:
+  pull_request:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+concurrency:
+  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
 
 jobs:
   gradle:
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ] #, windows-latest ]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+      fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-java@v3
         with:
           java-version: 8
           distribution: zulu
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+      - name: Cache Kotlin Konan
+        id: cache-kotlin-konan
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.konan/**/*
+          key: kotlin-konan-${{ runner.os }}
 
-      - name: Execute Gradle build
-        run: ./gradlew build --no-configuration-cache --no-daemon
+      - uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-cleanup: true
+          arguments: build
