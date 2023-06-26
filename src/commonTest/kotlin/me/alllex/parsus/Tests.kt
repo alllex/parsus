@@ -3,7 +3,10 @@ package me.alllex.parsus
 import assertk.Assert
 import assertk.all
 import assertk.assertThat
-import assertk.assertions.*
+import assertk.assertions.isEqualTo
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isNull
+import assertk.assertions.prop
 import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.*
 import me.alllex.parsus.tree.*
@@ -451,6 +454,19 @@ class Tests {
         }
     }
 
+    @Test
+    fun literalIgnoreCase() {
+        object : Grammar<SyntaxTree>() {
+            val data by literalToken("data", ignoreCase = true)
+            override val root by parser { lexeme(data) }
+        }.run {
+            assertParsed("data").isEqualTo(data.lex())
+            assertParsed("DATA").isEqualTo(data.lex("DATA"))
+            assertParsed("Data").isEqualTo(data.lex("Data"))
+            assertParsed("dAtA").isEqualTo(data.lex("dAtA"))
+        }
+    }
+
     companion object {
 
         private fun <T> Grammar<T>.assertParsed(text: String): Assert<T> = assertThat(parseEntireOrThrow(text))
@@ -471,11 +487,11 @@ class Tests {
 
         private fun node(children: List<SyntaxTree>) = Node(children)
 
-        private fun LiteralToken.lex(offset: Int): Lexeme {
+        private fun LiteralToken.lex(offset: Int = 0): Lexeme {
             return Lexeme(TokenMatch(this, offset, string.length), string)
         }
 
-        private fun Token.lex(text: String, offset: Int): Lexeme {
+        private fun Token.lex(text: String, offset: Int = 0): Lexeme {
             return Lexeme(TokenMatch(this, offset, text.length), text)
         }
 
