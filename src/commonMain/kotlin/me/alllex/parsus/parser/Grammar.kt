@@ -71,6 +71,7 @@ abstract class Grammar<out V>(
      * If parsing is successful, returns a value.
      * Otherwise, throws a [ParseException] containing an error.
      */
+    @Throws(ParseException::class)
     fun parseEntireOrThrow(input: String): V {
         return parseEntire(input).getOrThrow()
     }
