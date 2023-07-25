@@ -37,6 +37,7 @@ interface GrammarContext
  * ```
  */
 abstract class Grammar<out V>(
+    val ignoreCase: Boolean = false,
     private val debugMode: Boolean = false,
 ) : GrammarContext {
 

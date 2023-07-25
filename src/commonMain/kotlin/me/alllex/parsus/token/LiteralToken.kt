@@ -39,5 +39,5 @@ fun Grammar<*>.literalToken(
     text: String,
     name: String? = null,
     ignored: Boolean = false,
-    ignoreCase: Boolean = false,
+    ignoreCase: Boolean = this.ignoreCase,
 ): LiteralToken = LiteralToken(text, name, ignored, ignoreCase).also { register(it) }
