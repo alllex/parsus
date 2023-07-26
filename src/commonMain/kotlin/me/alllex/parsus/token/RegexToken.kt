@@ -29,8 +29,6 @@ private fun Regex.withIgnoreCase(ignoreCase: Boolean) =
     if (!ignoreCase || RegexOption.IGNORE_CASE in options) this
     else Regex(pattern, options + RegexOption.IGNORE_CASE)
 
-// TODO: Add a @Language annotation to automatically highlight the pattern as a regex in the IDE
-//  see: https://github.com/kotest/kotest/pull/3397
 /**
  * Creates and registers a regex token in this grammar.
  *
