@@ -1,3 +1,5 @@
+@file:Suppress("PackageDirectoryMismatch", "unused")
+
 package org.intellij.lang.annotations
 
 /**
