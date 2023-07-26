@@ -44,7 +44,7 @@ class ReadmeTests {
             override val root by implChain
         }
 
-        val ast = booleanGrammar.parseEntire("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a").getOrThrow()
+        val ast = booleanGrammar.parseOrThrow("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a")
 
         assertEquals(
             actual = ast,

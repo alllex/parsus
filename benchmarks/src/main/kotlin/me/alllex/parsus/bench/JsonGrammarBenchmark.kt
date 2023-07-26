@@ -13,12 +13,12 @@ class JsonGrammarBenchmark {
 
     @Benchmark
     fun jsonNaiveParser(bh: Blackhole) {
-        bh.consume(NaiveJsonGrammar.parseEntireOrThrow(jsonSample1K))
+        bh.consume(NaiveJsonGrammar.parseOrThrow(jsonSample1K))
     }
 
     @Benchmark
     fun jsonFasterParser(bh: Blackhole) {
-        bh.consume(FasterJsonGrammar.parseEntireOrThrow(jsonSample1K))
+        bh.consume(FasterJsonGrammar.parseOrThrow(jsonSample1K))
     }
 
     @Benchmark

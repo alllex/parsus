@@ -109,11 +109,11 @@ fun main() {
     for (expr in exprs) {
         println("Parsing expr: $expr")
         println()
-        val parsedExpr = ExprParser.parseEntireOrThrow(expr)
+        val parsedExpr = ExprParser.parseOrThrow(expr)
         println("Parsed tree:")
         println(parsedExpr)
         println()
-        val computedValue = ExprCalculator.parseEntireOrThrow(expr)
+        val computedValue = ExprCalculator.parseOrThrow(expr)
         println("Computed value:")
         println(computedValue)
         println()

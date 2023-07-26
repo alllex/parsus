@@ -11,9 +11,11 @@ class SExpressionTest {
     fun sexprParsing() {
         val grammar = SExpressionGrammar
         assertEquals(
-            actual = grammar.parseEntireOrThrow("""
-                ((data "quoted data" 123 4.5) (data (!@# (4.5) "(more" "data)")))
-            """.trimIndent()),
+            actual = grammar.parseOrThrow(
+                """
+                    ((data "quoted data" 123 4.5) (data (!@# (4.5) "(more" "data)")))
+                """.trimIndent()
+            ),
             expected = Lst(
                 Lst(
                     Sym("data"),

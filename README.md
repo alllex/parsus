@@ -29,7 +29,7 @@ val booleanGrammar = object : Grammar<Expr>() {
     override val root by implChain
 }
 
-val ast = booleanGrammar.parseEntire("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a").getOrThrow()
+val ast = booleanGrammar.parse("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a").getOrThrow()
 ```
 
 ## Usage
@@ -83,7 +83,7 @@ val g1 = object : Grammar<String>() {
     override val root by parser { tokenA().text }
 }
 
-println(g1.parseEntireOrThrow("a")) // prints "a"
+println(g1.parseOrThrow("a")) // prints "a"
 ```
 
 It is just a few lines of declarative code, but there a lot going on under the hood. So, let us break it down.
@@ -138,7 +138,7 @@ val g2 = object : Grammar<String>() {
     override val root by parser { tokenA().text }
 }
 
-println(g2.parseEntireOrThrow(" a\t")) // prints "a"
+println(g2.parseOrThrow(" a\t")) // prints "a"
 ```
 
 In this example, we create a token by calling `regexToken`.
@@ -212,7 +212,7 @@ val g3 = object : Grammar<Int>() {
     override val root by parser { tokenNum().text.toInt() }
 }
 
-println(g3.parseEntireOrThrow("123")) // prints 123
+println(g3.parseOrThrow("123")) // prints 123
 ```
 
 ### Parser Combinators
@@ -235,7 +235,7 @@ val g4 = object : Grammar<String>() {
     }
 }
 
-println(g4.parseEntireOrThrow("abc+123")) // prints "(abc) + (123)"
+println(g4.parseOrThrow("abc+123")) // prints "(abc) + (123)"
 ```
 
 This example shows the main way in which parsers are combined - sequentially. The `root` parser expects first an id to
@@ -266,8 +266,8 @@ val g5 = object : Grammar<String>() {
     }
 }
 
-println(g5.parseEntireOrThrow("abc+123")) // prints "(abc) + (123)"
-println(g5.parseEntireOrThrow("909+wow")) // prints "(909) + (wow)"
+println(g5.parseOrThrow("abc+123")) // prints "(abc) + (123)"
+println(g5.parseOrThrow("909+wow")) // prints "(909) + (wow)"
 ```
 
 Now we have a repeating piece of code inside our parser implementation. So we ought to refactor it by introducing

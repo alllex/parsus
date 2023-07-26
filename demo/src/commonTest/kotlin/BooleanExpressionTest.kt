@@ -10,7 +10,7 @@ class BooleanExpressionTest {
     @Test
     fun boolExprParsing() {
         assertEquals(
-            actual = BooleanGrammar.parseEntireOrThrow("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a"),
+            actual = BooleanGrammar.parseOrThrow("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a"),
             expected = Impl(
                 Or(
                     Or(

@@ -7,7 +7,7 @@ import kotlin.coroutines.RestrictsSuspension
 /**
  * Provides necessary scope to compose and execute parsers.
  *
- * Instances of the scope are automatically created when parsing [starts][Grammar.parseEntire].
+ * Instances of the scope are automatically created when parsing [starts][Grammar.parse].
  */
 @RestrictsSuspension
 interface ParsingScope {
