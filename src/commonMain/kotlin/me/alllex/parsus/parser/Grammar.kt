@@ -193,7 +193,7 @@ abstract class Grammar<out V>(
 /**
  * Attempts to parse the entire input and returns the parsed value or the default value if parsing fails.
  */
-inline fun <V> Grammar<V>.parseEntireOrElse(input: String, default: (ParseError) -> V): V {
+inline fun <V> Grammar<V>.parseOrElse(input: String, default: (ParseError) -> V): V {
     return when (val result = parse(input)) {
         is ParsedValue -> result.value
         is ParseError -> default(result)
@@ -203,4 +203,4 @@ inline fun <V> Grammar<V>.parseEntireOrElse(input: String, default: (ParseError)
 /**
  * Attempts to parse the entire input and returns the parsed value or `null` if parsing fails.
  */
-fun <V> Grammar<V>.parseEntireOrNull(input: String): V? = parseEntireOrElse(input) { null }
+fun <V> Grammar<V>.parseOrNull(input: String): V? = parseOrElse(input) { null }
