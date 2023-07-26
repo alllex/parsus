@@ -25,6 +25,10 @@ class RegexToken(
     override fun toString(): String = "RegexToken(${name ?: ""} [$pattern]${if (ignored) " [ignored]" else ""})"
 }
 
+private fun Regex.withIgnoreCase(ignoreCase: Boolean) =
+    if (!ignoreCase || RegexOption.IGNORE_CASE in options) this
+    else Regex(pattern, options + RegexOption.IGNORE_CASE)
+
 /**
  * Creates and registers a regex token in this grammar.
  *
@@ -34,8 +38,9 @@ fun Grammar<*>.regexToken(
     @Language("RegExp", "", "")
     pattern: String,
     name: String? = null,
-    ignored: Boolean = false
-): RegexToken = RegexToken(Regex(pattern), name, ignored).also { register(it) }
+    ignored: Boolean = false,
+    ignoreCase: Boolean = this.ignoreCase,
+): RegexToken = regexToken(Regex(pattern), name, ignored, ignoreCase)
 
 /**
  * Creates and registers a regex token in this grammar.
@@ -45,5 +50,8 @@ fun Grammar<*>.regexToken(
 fun Grammar<*>.regexToken(
     regex: Regex,
     name: String? = null,
-    ignored: Boolean = false
-): RegexToken = RegexToken(regex, name, ignored).also { register(it) }
+    ignored: Boolean = false,
+    ignoreCase: Boolean = this.ignoreCase,
+): RegexToken = RegexToken(regex.withIgnoreCase(ignoreCase), name, ignored).also { register(it) }
+
+

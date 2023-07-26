@@ -51,6 +51,7 @@ inline fun <T> ParseResult<T>.getOrElse(f: (ParseError) -> T): T {
     }
 }
 
+@Throws(ParseException::class)
 fun <T> ParseResult<T>.getOrThrow(): T {
     return when (this) {
         is ParsedValue -> value

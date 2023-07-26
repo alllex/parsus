@@ -7,7 +7,7 @@ import kotlin.coroutines.RestrictsSuspension
 /**
  * Provides necessary scope to compose and execute parsers.
  *
- * Instances of the scope are automatically created when parsing [starts][Grammar.parseEntire].
+ * Instances of the scope are automatically created when parsing [starts][Grammar.parse].
  */
 @RestrictsSuspension
 interface ParsingScope {
@@ -52,7 +52,9 @@ interface ParsingScope {
      */
     val TokenMatch.text: String
 
+    @Deprecated("Use `skip` instead", ReplaceWith("skip(this)"))
     suspend operator fun Parser<*>.unaryMinus(): IgnoredValue = skip(this)
 
-    suspend operator fun Parser<Any>.unaryPlus(): Boolean = checkPresent(this)
+    @Deprecated("Use `has` instead", ReplaceWith("has(this)"))
+    suspend operator fun Parser<Any>.unaryPlus(): Boolean = has(this)
 }

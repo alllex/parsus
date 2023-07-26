@@ -24,27 +24,27 @@ afterEvaluate {
 publishing {
     publications.withType<MavenPublication>().configureEach {
         pom {
-            name.set("Parsus")
-            description.set("Composable parsers using Kotlin Coroutines")
-            url.set("https://github.com/alllex/parsus")
+            name = "Parsus"
+            description = "Composable parsers using Kotlin Coroutines"
+            url = "https://github.com/alllex/parsus"
             licenses {
                 license {
-                    name.set("MIT")
-                    url.set("https://opensource.org/licenses/MIT")
+                    name = "MIT"
+                    url = "https://opensource.org/licenses/MIT"
                 }
             }
             developers {
                 developer {
-                    id.set("alllex")
-                    name.set("Alex by Software")
-                    email.set("software@alllex.me")
-                    url.set("https://alllex.me")
+                    id = "alllex"
+                    name = "Alex by Software"
+                    email = "software@alllex.me"
+                    url = "https://alllex.me"
                 }
             }
             scm {
-                connection.set("scm:git:git@github.com:alllex/parsus.git")
-                developerConnection.set("scm:git:git@github.com:alllex/parsus.git")
-                url.set("https://github.com/alllex/parsus")
+                connection = "scm:git:git@github.com:alllex/parsus.git"
+                developerConnection = "scm:git:git@github.com:alllex/parsus.git"
+                url = "https://github.com/alllex/parsus"
             }
         }
     }

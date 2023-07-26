@@ -27,7 +27,7 @@ val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
     description = "Produce javadoc with Dokka HTML inside"
     dependsOn(tasks.dokkaHtml)
     from(tasks.dokkaHtml)
-    archiveClassifier.set("javadoc")
+    archiveClassifier = "javadoc"
 }
 
 // Without this there is a Gradle error (notice mismatch between publish task and sign names):
@@ -46,8 +46,8 @@ publishing {
 nexusPublishing {
     repositories {
         sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            nexusUrl = uri("https://s01.oss.sonatype.org/service/local/")
+            snapshotRepositoryUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
         }
     }
 }

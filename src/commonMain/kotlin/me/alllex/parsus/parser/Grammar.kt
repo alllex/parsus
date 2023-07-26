@@ -12,7 +12,7 @@ interface GrammarContext
 
 /**
  * Grammar defines all tokens that are expected to occur in the input
- * and the [root] parser which is used to [parse][parseEntire] the resulting value.
+ * and the [root] parser which is used to [parse] the resulting value.
  *
  * The tokens must either be [registered][register] manually or using a property-delegate with the `by` keyword.
  * Declaring parsers using `by` is also a preferred way as it allows to use them recursively.
@@ -37,6 +37,7 @@ interface GrammarContext
  * ```
  */
 abstract class Grammar<out V>(
+    val ignoreCase: Boolean = false,
     private val debugMode: Boolean = false,
 ) : GrammarContext {
 
@@ -51,28 +52,62 @@ abstract class Grammar<out V>(
     abstract val root: Parser<V>
 
     /**
-     * Parses entire input and returns the parsed value wrapped in the [ParseResult].
+     * Parses entire input with the [root] parser of the grammar
+     * and returns the parsed value wrapped in the [ParseResult].
      * If parsing fails the result will be a [ParseError].
      */
-    fun parseEntire(input: String): ParseResult<V> {
-        freezeTokens = true
-        val lexer = Lexer(input, _tokens)
-        val parsingContext = ParsingContext(lexer, debugMode)
-        val untilEofParser = parser {
-            val r = root()
-            EofToken()
-            r
-        }
-
-        return parsingContext.runParser(untilEofParser)
+    fun parse(input: String): ParseResult<V> {
+        return parseEntire(root, input)
     }
 
     /**
-     * If parsing is successful, returns a value.
-     * Otherwise, throws a [ParseException] containing an error.
+     * Parses entire input with the [root] parser of the grammar
+     * and returns the parsed value wrapped in the [ParseResult].
+     * If parsing fails throws a [ParseException] containing an error.
      */
+    @Throws(ParseException::class)
+    fun parseOrThrow(input: String): V {
+        return parse(input).getOrThrow()
+    }
+
+    /**
+     * Parses entire input with the provided [parser] (instead of the [root] of the grammar)
+     * and returns the parsed value wrapped in the [ParseResult].
+     * If parsing fails the result will be a [ParseError].
+     */
+    fun <T> parse(parser: Parser<T>, input: String): ParseResult<T> {
+        return parseEntire(parser, input)
+    }
+
+    /**
+     * Parses entire input with the provided [parser] (instead of the [root] of the grammar)
+     * and returns the parsed value wrapped in the [ParseResult].
+     * If parsing fails throws a [ParseException] containing an error.
+     */
+    @Throws(ParseException::class)
+    fun <T> parseOrThrow(parser: Parser<T>, input: String): T {
+        return parse(parser, input).getOrThrow()
+    }
+
+    /**
+     * Parses entire input with the [root] parser of the grammar
+     * and returns the parsed value wrapped in the [ParseResult].
+     * If parsing fails the result will be a [ParseError].
+     */
+    @Deprecated("Use parse instead", ReplaceWith("parse(input)"))
+    fun parseEntire(input: String): ParseResult<V> {
+        return parse(input)
+    }
+
+    /**
+     * Parses entire input with the [root] parser of the grammar
+     * and returns the parsed value wrapped in the [ParseResult].
+     * If parsing fails throws a [ParseException] containing an error.
+     */
+    @Deprecated("Use parseOrThrow instead", ReplaceWith("parseOrThrow(input)"))
+    @Throws(ParseException::class)
     fun parseEntireOrThrow(input: String): V {
-        return parseEntire(input).getOrThrow()
+        return parseOrThrow(input)
     }
 
     /**
@@ -140,4 +175,32 @@ abstract class Grammar<out V>(
         }
 
     protected operator fun <R> Parser<R>.getValue(thisRef: Grammar<*>, property: KProperty<*>): Parser<R> = this
+
+    private fun <T> parseEntire(parser: Parser<T>, input: String): ParseResult<T> {
+        freezeTokens = true
+        val lexer = Lexer(input, _tokens)
+        val parsingContext = ParsingContext(lexer, debugMode)
+        val untilEofParser = parser {
+            val r = parser()
+            EofToken()
+            r
+        }
+
+        return parsingContext.runParser(untilEofParser)
+    }
 }
+
+/**
+ * Attempts to parse the entire input and returns the parsed value or the default value if parsing fails.
+ */
+inline fun <V> Grammar<V>.parseOrElse(input: String, default: (ParseError) -> V): V {
+    return when (val result = parse(input)) {
+        is ParsedValue -> result.value
+        is ParseError -> default(result)
+    }
+}
+
+/**
+ * Attempts to parse the entire input and returns the parsed value or `null` if parsing fails.
+ */
+fun <V> Grammar<V>.parseOrNull(input: String): V? = parseOrElse(input) { null }

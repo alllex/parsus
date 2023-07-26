@@ -11,28 +11,28 @@ class Tests {
 
     @Test
     fun naiveJsonGrammarSmallInput() {
-        val json = NaiveJsonGrammar.parseEntireOrThrow(smallInput)
+        val json = NaiveJsonGrammar.parseOrThrow(smallInput)
         val jsonString = jsonToString(json)
         assertEquals(smallInput, jsonString)
     }
 
     @Test
     fun naiveJsonGrammarLargeInput() {
-        val json = NaiveJsonGrammar.parseEntireOrThrow(largeInput)
+        val json = NaiveJsonGrammar.parseOrThrow(largeInput)
         val jsonString = jsonToString(json)
         assertEquals(largeInput, jsonString)
     }
 
     @Test
     fun fasterJsonGrammarSmallInput() {
-        val json = FasterJsonGrammar.parseEntireOrThrow(smallInput)
+        val json = FasterJsonGrammar.parseOrThrow(smallInput)
         val jsonString = jsonToString(json)
         assertEquals(smallInput, jsonString)
     }
 
     @Test
     fun fasterJsonGrammarLargeInput() {
-        val json = FasterJsonGrammar.parseEntireOrThrow(largeInput)
+        val json = FasterJsonGrammar.parseOrThrow(largeInput)
         val jsonString = jsonToString(json)
         assertEquals(largeInput, jsonString)
     }
