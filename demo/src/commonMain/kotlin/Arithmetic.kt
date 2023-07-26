@@ -29,7 +29,7 @@ abstract class AbstractArithmeticGrammar<T> : Grammar<T>() {
     val int by regexToken("\\d+")
 
     val number by parser { int() } map { it.text.toInt() }
-    val braced by parser { -lpar * expr() * -rpar }
+    val braced by parser { skip(lpar) * expr() * skip(rpar) }
 
     abstract val expr: Parser<T>
     override val root by parser { expr() }
@@ -40,7 +40,7 @@ object ExprParser : AbstractArithmeticGrammar<Expr>() {
     val const by number map { Expr.Con(it) }
 
     val term by parser {
-        val neg = +minus
+        val neg = has(minus)
         val v = choose(const, braced)
         if (neg) Expr.Neg(v) else v
     }
@@ -69,7 +69,7 @@ object ExprCalculator : AbstractArithmeticGrammar<Int>() {
     val const by number
 
     val term by parser {
-        val neg = +minus
+        val neg = has(minus)
         val v = choose(const, braced)
         if (neg) -v else v
     }

@@ -42,7 +42,12 @@ suspend fun ParsingScope.skip(p: Parser<*>): IgnoredValue {
 }
 
 /**
- * Returns true if the parser executes successfully and false otherwise.
+ * Returns true if the parser executes successfully (consuming input) and false otherwise (not consuming any input).
+ */
+suspend fun ParsingScope.has(p: Parser<Any>): Boolean = checkPresent(p)
+
+/**
+ * Returns true if the parser executes successfully (consuming input) and false otherwise (not consuming any input).
  */
 suspend fun ParsingScope.checkPresent(p: Parser<Any>): Boolean = tryOrNull(p) != null
 

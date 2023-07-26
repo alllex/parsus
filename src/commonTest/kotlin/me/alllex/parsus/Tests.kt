@@ -37,7 +37,7 @@ class Tests {
         object : Grammar<SyntaxTree>() {
             val a by literalToken("a")
             val empty = parser {}
-            override val root = parser { -empty * lexeme(a) }
+            override val root = parser { skip(empty) * lexeme(a) }
         }.let { g ->
             assertThat(g.parseOrThrow("a")).isEqualTo(g.a.lex(0))
         }
@@ -210,12 +210,16 @@ class Tests {
             val a by literalToken("a")
             val b by literalToken("b")
             val c by literalToken("c")
-            init { literalToken("d") }
+
+            init {
+                literalToken("d")
+            }
+
             val ap = parser { lexeme(a) }
             val bp = parser { lexeme(b) }
             val cp = parser { lexeme(c) }
             val abcp = parser { choose(ap, bp, cp) }
-            override val root = parser { node(abcp() + abcp())}
+            override val root = parser { node(abcp() + abcp()) }
         }.let { g ->
             assertThat(g.parseOrThrow("ab")).isEqualTo(node(g.a, g.b))
             assertThat(g.parseOrThrow("bc")).isEqualTo(node(g.b, g.c))
@@ -266,6 +270,42 @@ class Tests {
         }.run {
             assertThat(parseOrThrow("ab")).isEqualTo(node(a, b))
             assertThat(parseOrThrow("ac")).isEqualTo(node(a, c))
+        }
+    }
+
+    @Test
+    fun skipParser() {
+        object : Grammar<SyntaxTree>() {
+            val a by literalToken("a")
+            val b by literalToken("b")
+            val ap = parlex(a)
+            val ab = parlex(b)
+            override val root = parser {
+                skip(ap)
+                ab()
+            }
+        }.run {
+            assertParsed("ab").isEqualTo(b.lex(1))
+            assertThatParsing("b").failedWithTokenMismatch(a, b, offset = 0)
+        }
+    }
+
+    @Test
+    fun hasParser() {
+        object : Grammar<Pair<Boolean, Boolean>>() {
+            val a by literalToken("a")
+            val b by literalToken("b")
+            override val root = parser {
+                val hasA = has(a)
+                val hasB = has(b)
+                hasA to hasB
+            }
+        }.run {
+            assertParsed("ab").isEqualTo(true to true)
+            assertParsed("a").isEqualTo(true to false)
+            assertParsed("b").isEqualTo(false to true)
+            assertParsed("").isEqualTo(false to false)
+            assertThatParsing("aa").failedWithTokenMismatch(EofToken, a, offset = 1)
         }
     }
 
@@ -417,7 +457,7 @@ class Tests {
             val rp by literalToken(")")
             val a by literalToken("a")
             val ap by parser { lexeme(a) }
-            val p: Parser<SyntaxTree> by ap or parser { -lp * p() * -rp }
+            val p: Parser<SyntaxTree> by ap or parser { skip(lp) * p() * skip(rp) }
             override val root = p
         }.run {
             assertParsed("a").isEqualTo(a.lex(0))
@@ -501,7 +541,7 @@ class Tests {
             val re by regexToken(Regex("[de]"))
             val lam by token { s, i -> if (s[i] == 'f' || (ignoreCase && s[i] == 'F')) 1 else 0 }
             val lamStrict by token { s, i -> if (s[i] == 'g') 1 else 0 }
-            override val root by parser { lexeme(lit) } or parser { lexeme(reLit) } or parser { lexeme(re) } or parser { lexeme(lam) } or parser { lexeme(lamStrict) }
+            override val root by parlex(lit) or parlex(reLit) or parlex(re) or parlex(lam) or parlex(lamStrict)
         }.run {
             assertParsed("a").isEqualTo(lit.lex("a"))
             assertParsed("A").isEqualTo(lit.lex("A"))
@@ -531,6 +571,8 @@ class Tests {
     }
 
     companion object {
+
+        private fun parlex(token: Token) = parser { lexeme(token) }
 
         private fun <T> Grammar<T>.assertParsed(text: String): Assert<T> = assertThat(parseOrThrow(text))
 
