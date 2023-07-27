@@ -68,6 +68,16 @@ There are, however, no pros without cons. Parsus relies heavily on coroutines ma
 performance and memory overhead as compared to other techniques such as generating parsers at compile-time from special
 grammar formats.
 
+## Quick Reference
+
+| Description | Procedural Grammar | Combinator Grammar | Parsing |
+| ----------- | ------------------ | ------------------ | ------- |
+| Parsing token and getting its text | <pre>            val ab by regexToken("a[bB]")<br/>            override val root by parser {<br/>                val abMatch = ab()<br/>                abMatch.text<br/>            }</pre> | <pre>            val ab by regexToken("a[bB]")<br/>            override val root by ab map { it.text }</pre> | `ab` => (`ab`)<br/>`aB` => (`aB`) |
+| Parsing two tokens sequentially | <pre>            val a by literalToken("a")<br/>            val b by regexToken("[bB]")<br/>            override val root by parser {<br/>                val aMatch = a()<br/>                val bMatch = b()<br/>                aMatch.text to bMatch.text<br/>            }</pre> | <pre>            val a by literalToken("a")<br/>            val b by regexToken("[bB]")<br/>            override val root by a and b map<br/>                { (aM, bM) -> aM.text to bM.text }</pre> | `ab` => (`a`, `b`)<br/>`aB` => (`a`, `B`) |
+| Parsing one of two tokens | <pre>            val a by literalToken("a")<br/>            val b by regexToken("[bB]")<br/>            override val root by parser {<br/>                val abMatch = choose(a, b)<br/>                abMatch.text<br/>            }</pre> | <pre>            val a by literalToken("a")<br/>            val b by regexToken("[bB]")<br/>            override val root by a or b map { it.text }</pre> | `a` => (`a`)<br/>`b` => (`b`)<br/>`B` => (`B`) |
+| Parsing an optional token | <pre>            val a by literalToken("a")<br/>            val b by regexToken("[bB]")<br/>            override val root by parser {<br/>                val aMatch = poll(a)<br/>                val bMatch = b()<br/>                aMatch?.text to bMatch.text<br/>            }</pre> | <pre>            val a by literalToken("a")<br/>            val b by regexToken("[bB]")<br/>            override val root by optional(a) and b map<br/>                { (aM, bM) -> aM?.text to bM.text }</pre> | `ab` => (`a`, `b`)<br/>`aB` => (`a`, `B`)<br/>`b` => (null, `b`)<br/>`B` => (null, `B`) |
+| Parsing a token and ignoring its value | <pre>            val a by literalToken("a")<br/>            val b by regexToken("[bB]")<br/>            override val root by parser {<br/>                skip(a) // or just a() without using the value<br/>                val bMatch = b()<br/>                bMatch.text<br/>            }</pre> | <pre>            val a by literalToken("a")<br/>            val b by regexToken("[bB]")<br/>            override val root by -a * b map { it.text }</pre> | `ab` => (`b`)<br/>`aB` => (`B`) |
+
 ## Introduction
 
 The goal of a grammar is to define rules by which to turn an input string of characters into a structured value. This

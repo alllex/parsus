@@ -51,3 +51,8 @@ nexusPublishing {
         }
     }
 }
+
+tasks.register<GenerateQuickReferenceMarkdown>("generateQuickRef") {
+    kotlinTestSource = project.layout.projectDirectory.file("src/commonTest/kotlin/me/alllex/parsus/ReadmeTests.kt")
+    markdownOutput = project.layout.buildDirectory.file("quickref.md")
+}
