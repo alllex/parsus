@@ -7,7 +7,7 @@ package me.alllex.parsus.parser
  * ```kotlin
  * val lpar by literalToken("(")
  * val rpar by literalToken(")")
- * val braced by parser { -lpar * expr() * -rpar }
+ * val braced by parser { skip(lpar) * expr() * skip(rpar) }
  * ```
  */
 object IgnoredValue

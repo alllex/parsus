@@ -27,7 +27,7 @@ interface GrammarContext
  *     val int by regexToken("\\d+")
  *
  *     val number by parser { int() } map { it.text.toInt() }
- *     val braced by parser { -lpar * root() * -rpar }
+ *     val braced by parser { skip(lpar) * root() * skip(rpar) }
  *     val term by number or braced
  *
  *     override val root: Parser<Int> by parser {
@@ -115,7 +115,7 @@ abstract class Grammar<out V>(
      *
      * @see times
      */
-    operator fun Parser<*>.unaryMinus(): Parser<Unit> = this map Unit
+    operator fun Parser<*>.unaryMinus(): Parser<Unit> = ignored(this)
 
     /**
      * Creates a parser that ignores the result of the first parser and returns the result of the second parser.

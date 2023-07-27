@@ -47,6 +47,29 @@ fun <T> Parser<T>.between(left: Parser<*>, right: Parser<*>): Parser<T> = parser
     result
 }
 
+/**
+ * Returns a new parser that applies the given [parser], but ignores the result.
+ *
+ * ```kotlin
+ * object : Grammar<String> {
+ *     val title by regexToken("Mrs?\\.?\\s+")
+ *     val surname by regexToken("\\w+")
+ *     override val root by ignored(title) * surname
+ * }
+ * ```
+ */
+fun ignored(parser: Parser<*>): Parser<Unit> = parser map Unit
+
+/**
+ * Returns a new parser that tries to apply the given [parser]
+ * and fallbacks to returning null in case of failure.
+ *
+ * ```kotlin
+ * object : Grammar<Pair<String?, String>> {
+ *    val title by regexToken("Mrs?\\.?\\s+")
+ *    val surname by regexToken("\\w+")
+ *    override val root by optional(title) * surname
+ */
 fun <T : Any> optional(parser: Parser<T>): Parser<T?> = parser {
     poll(parser)
 }
