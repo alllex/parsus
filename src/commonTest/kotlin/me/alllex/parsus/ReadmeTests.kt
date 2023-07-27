@@ -64,4 +64,152 @@ class ReadmeTests {
         )
     }
 
+    @Test
+    fun quickRefTokenText() {
+        // Parsing token and getting its text
+        val testCases = listOf(
+            "ab" to ("ab"),
+            "aB" to ("aB"),
+        )
+
+        val proc = object : Grammar<String>() {
+            val ab by regexToken("a[bB]")
+            override val root by parser {
+                val abMatch = ab()
+                abMatch.text
+            }
+        }
+
+        val comb = object : Grammar<String>() {
+            val ab by regexToken("a[bB]")
+            override val root by ab map { it.text }
+        }
+
+        checkAll(proc, comb, testCases = testCases)
+    }
+
+    @Test
+    fun quickRefSequential() {
+        // Parsing two tokens sequentially
+        val testCases = listOf(
+            "ab" to ("a" to "b"),
+            "aB" to ("a" to "B"),
+        )
+
+        val proc = object : Grammar<Pair<String, String>>() {
+            val a by literalToken("a")
+            val b by regexToken("[bB]")
+            override val root by parser {
+                val aMatch = a()
+                val bMatch = b()
+                aMatch.text to bMatch.text
+            }
+        }
+
+        val comb = object : Grammar<Pair<String, String>>() {
+            val a by literalToken("a")
+            val b by regexToken("[bB]")
+            override val root by a and b map
+                { (aM, bM) -> aM.text to bM.text }
+        }
+
+        checkAll(proc, comb, testCases = testCases)
+    }
+
+    @Test
+    fun quickRefAlternative() {
+        // Parsing one of two tokens
+        val testCases = listOf(
+            "a" to ("a"),
+            "b" to ("b"),
+            "B" to ("B"),
+        )
+
+        val proc = object : Grammar<String>() {
+            val a by literalToken("a")
+            val b by regexToken("[bB]")
+            override val root by parser {
+                val abMatch = choose(a, b)
+                abMatch.text
+            }
+        }
+
+        val comb = object : Grammar<String>() {
+            val a by literalToken("a")
+            val b by regexToken("[bB]")
+            override val root by a or b map { it.text }
+        }
+
+        checkAll(proc, comb, testCases = testCases)
+    }
+
+    @Test
+    fun quickRefOptional() {
+        // Parsing an optional token
+        val testCases = listOf(
+            "ab" to ("a" to "b"),
+            "aB" to ("a" to "B"),
+            "b" to (null to "b"),
+            "B" to (null to "B"),
+        )
+
+        val proc = object : Grammar<Pair<String?, String>>() {
+            val a by literalToken("a")
+            val b by regexToken("[bB]")
+            override val root by parser {
+                val aMatch = poll(a)
+                val bMatch = b()
+                aMatch?.text to bMatch.text
+            }
+        }
+
+        val comb = object : Grammar<Pair<String?, String>>() {
+            val a by literalToken("a")
+            val b by regexToken("[bB]")
+            override val root by optional(a) and b map
+                { (aM, bM) -> aM?.text to bM.text }
+        }
+
+        checkAll(proc, comb, testCases = testCases)
+    }
+
+    @Test
+    fun quickRefIgnored() {
+        // Parsing a token and ignoring its value
+        val testCases = listOf(
+            "ab" to ("b"),
+            "aB" to ("B"),
+        )
+
+        val proc = object : Grammar<String>() {
+            val a by literalToken("a")
+            val b by regexToken("[bB]")
+            override val root by parser {
+                skip(a) // or just a() without using the value
+                val bMatch = b()
+                bMatch.text
+            }
+        }
+
+        val comb = object : Grammar<String>() {
+            val a by literalToken("a")
+            val b by regexToken("[bB]")
+            override val root by -a * b map { it.text }
+        }
+
+        checkAll(proc, comb, testCases = testCases)
+    }
+
+    private fun <T> checkAll(
+        vararg grammars: Grammar<T>,
+        testCases: List<Pair<String, T>>,
+    ) {
+        require(grammars.isNotEmpty())
+        for (g in grammars) {
+            for ((input, expected) in testCases) {
+                assertEquals(actual = g.parseOrThrow(input), expected = expected)
+            }
+        }
+    }
+
 }
