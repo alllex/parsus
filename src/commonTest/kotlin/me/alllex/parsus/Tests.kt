@@ -570,11 +570,44 @@ class Tests {
         }
     }
 
+    @Test
+    fun forceIgnoredTokenParsing() {
+        object : Grammar<SyntaxTree>() {
+            val ws by regexToken("\\s+", ignored = true)
+            val a by literalToken("a")
+            override val root by parser {
+                val a1 = lexeme(a)
+                ws()
+                val a2 = lexeme(a)
+                node(a1, a2)
+            }
+        }.run {
+            assertParsed("a a").isEqualTo(node(a.lex("a", 0), a.lex("a", 2)))
+            assertParsed(" a a ").isEqualTo(node(a.lex("a", 1), a.lex("a", 3)))
+            assertNotParsed("aa").failedWithTokenMismatch(ws, a, 1)
+            assertNotParsed(" aa").failedWithTokenMismatch(ws, a, 2)
+        }
+
+        object : Grammar<SyntaxTree>() {
+            val ws by regexToken("\\s+", ignored = true)
+            val a by literalToken("a")
+            override val root by parlex(a) and (-ws * parlex(a)) map { node(it.first, it.second) }
+        }.run {
+            assertParsed("a a").isEqualTo(node(a.lex("a", 0), a.lex("a", 2)))
+            assertParsed(" a a ").isEqualTo(node(a.lex("a", 1), a.lex("a", 3)))
+            assertNotParsed("aa").failedWithTokenMismatch(ws, a, 1)
+            assertNotParsed(" aa").failedWithTokenMismatch(ws, a, 2)
+        }
+    }
+
     companion object {
 
         private fun parlex(token: Token) = parser { lexeme(token) }
 
         private fun <T> Grammar<T>.assertParsed(text: String): Assert<T> = assertThat(parseOrThrow(text))
+
+        private fun <T> Grammar<T>.assertNotParsed(text: String): Assert<ParseError> =
+            assertThat(parse(text)).isInstanceOf(ParseError::class)
 
         private fun <T> Grammar<T>.assertThatParsing(text: String): Assert<ParseResult<T>> = assertThat(parse(text))
 
