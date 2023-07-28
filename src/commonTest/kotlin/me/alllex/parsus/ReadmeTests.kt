@@ -66,7 +66,7 @@ class ReadmeTests {
 
     @Test
     fun quickRefTokenText() {
-        // Parsing token and getting its text
+        // Parsing a token and getting its text
         val testCases = listOf(
             "ab" to ("ab"),
             "aB" to ("aB"),

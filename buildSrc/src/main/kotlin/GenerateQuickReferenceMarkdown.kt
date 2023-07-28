@@ -21,17 +21,20 @@ abstract class GenerateQuickReferenceMarkdown : DefaultTask() {
     private fun generateMarkdown(input: String): String {
         val entries = parseSource(input)
         return buildString {
-            appendLine("| Description | Procedural Grammar | Combinator Grammar | Parsing |")
-            appendLine("| ----------- | ------------------ | ------------------ | ------- |")
+            appendLine("| Description | Grammars |")
+            appendLine("| ----------- | -------- |")
             for (entry in entries) {
                 append("| ")
                 append(entry.description)
+                append("<br/>")
+                append("<br/>")
+                append("Parses: ")
+                append(entry.testCases.joinToString(", ") { "`$it`" })
                 append(" | ")
+                append("Procedural:<br/>")
                 append(entry.proceduralGrammar.toMultilineMarkdownCodeBlock())
-                append(" | ")
+                append("Combinator:<br/>")
                 append(entry.combinatorGrammar.toMultilineMarkdownCodeBlock())
-                append(" | ")
-                append(entry.testCases.joinToString("<br/>"))
                 appendLine(" |")
             }
         }
@@ -88,17 +91,21 @@ abstract class GenerateQuickReferenceMarkdown : DefaultTask() {
 
             val testCases = testCaseLines.asSequence()
                 .map { it.trim().removeSuffix(",") }
-                .map { it.replace("\"", "`") }
-                .map { it.replaceFirst(" to ", " => ") }
-                .map { it.replace(" to ", ", ") }
+                .map { it.replace("\"([^\"]+)\".*".toRegex(), "$1") }
+                .toList()
+
+            fun parseGrammarLines() = linesIter.collectUntil { it.startsWith("        }") }
+                .joinToString("\n") { it }
+                .trimIndent()
+                .lines()
 
             // Find the procedural grammar and extract it
             linesIter.skipUntil { it.trim().startsWith("val proc") } ?: break
-            val proceduralGrammarLines = linesIter.collectUntil { it.startsWith("        }") }
+            val proceduralGrammarLines = parseGrammarLines()
 
             // Find the combinator grammar and extract it
             linesIter.skipUntil { it.trim().startsWith("val comb") } ?: break
-            val combinatorGrammarLines = linesIter.collectUntil { it.startsWith("        }") }
+            val combinatorGrammarLines = parseGrammarLines()
 
             // Add the entry
             entries += QuickRefEntry(
