@@ -1,47 +1,17 @@
 package me.alllex.parsus
 
-import assertk.Assert
-import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
-import assertk.assertions.prop
 import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.*
-import me.alllex.parsus.tree.*
+import me.alllex.parsus.tree.Lexeme
+import me.alllex.parsus.tree.SyntaxTree
+import me.alllex.parsus.tree.lexeme
+import me.alllex.parsus.tree.plus
 import kotlin.test.Test
 
 class Tests {
-
-    @Test
-    fun singleLiteral() {
-        object : Grammar<SyntaxTree>() {
-            val a by literalToken("a")
-            override val root = parser { lexeme(a) }
-        }.let { g ->
-            assertThat(g.parseOrThrow("a")).isEqualTo(
-                g.a.lex(0)
-            )
-        }
-    }
-
-    @Test
-    fun emptyParser() {
-        object : Grammar<Unit>() {
-            override val root = parser {}
-        }.let { g ->
-            assertThat(g.parseOrThrow("")).isEqualTo(Unit)
-        }
-
-        object : Grammar<SyntaxTree>() {
-            val a by literalToken("a")
-            val empty = parser {}
-            override val root = parser { skip(empty) * lexeme(a) }
-        }.let { g ->
-            assertThat(g.parseOrThrow("a")).isEqualTo(g.a.lex(0))
-        }
-    }
 
     @Test
     fun tokenMismatch() {
@@ -451,33 +421,6 @@ class Tests {
     }
 
     @Test
-    fun recursiveParser() {
-        object : Grammar<SyntaxTree>() {
-            val lp by literalToken("(")
-            val rp by literalToken(")")
-            val a by literalToken("a")
-            val ap by parser { lexeme(a) }
-            val p: Parser<SyntaxTree> by ap or parser { skip(lp) * p() * skip(rp) }
-            override val root = p
-        }.run {
-            assertParsed("a").isEqualTo(a.lex(0))
-            assertParsed("((a))").isEqualTo(a.lex(2))
-        }
-
-        object : Grammar<SyntaxTree>() {
-            val lp by literalToken("(")
-            val rp by literalToken(")")
-            val a by literalToken("a")
-            val ap by parser { lexeme(a) }
-            val p: Parser<SyntaxTree> by ap or (-lp * ref(::p) * -rp)
-            override val root = p
-        }.run {
-            assertParsed("a").isEqualTo(a.lex(0))
-            assertParsed("((a))").isEqualTo(a.lex(2))
-        }
-    }
-
-    @Test
     fun separated() {
         object : Grammar<SyntaxTree>() {
             val com by literalToken(",")
@@ -494,136 +437,4 @@ class Tests {
         }
     }
 
-    @Test
-    fun literalTokenIgnoreCase() {
-        object : Grammar<SyntaxTree>() {
-            val data by literalToken("data", ignoreCase = true)
-            override val root by parser { lexeme(data) }
-        }.run {
-            assertParsed("data").isEqualTo(data.lex())
-            assertParsed("DATA").isEqualTo(data.lex("DATA"))
-            assertParsed("Data").isEqualTo(data.lex("Data"))
-            assertParsed("dAtA").isEqualTo(data.lex("dAtA"))
-        }
-    }
-
-    @Test
-    fun regexTokenIgnoreCase() {
-        object : Grammar<SyntaxTree>() {
-            val data by regexToken("[ab]", ignoreCase = true)
-            override val root by parser { lexeme(data) }
-        }.run {
-            assertParsed("a").isEqualTo(data.lex("a"))
-            assertParsed("b").isEqualTo(data.lex("b"))
-            assertParsed("A").isEqualTo(data.lex("A"))
-            assertParsed("B").isEqualTo(data.lex("B"))
-        }
-    }
-
-    @Test
-    fun explicitRegexTokenIgnoreCase() {
-        object : Grammar<SyntaxTree>() {
-            val data by regexToken(Regex("[ab]"), ignoreCase = true)
-            override val root by parser { lexeme(data) }
-        }.run {
-            assertParsed("a").isEqualTo(data.lex("a"))
-            assertParsed("b").isEqualTo(data.lex("b"))
-            assertParsed("A").isEqualTo(data.lex("A"))
-            assertParsed("B").isEqualTo(data.lex("B"))
-        }
-    }
-
-    @Test
-    fun ignoreCaseGrammar() {
-        object : Grammar<SyntaxTree>(ignoreCase = true) {
-            val lit by literalToken("a")
-            val reLit by regexToken("[bc]")
-            val re by regexToken(Regex("[de]"))
-            val lam by token { s, i -> if (s[i] == 'f' || (ignoreCase && s[i] == 'F')) 1 else 0 }
-            val lamStrict by token { s, i -> if (s[i] == 'g') 1 else 0 }
-            override val root by parlex(lit) or parlex(reLit) or parlex(re) or parlex(lam) or parlex(lamStrict)
-        }.run {
-            assertParsed("a").isEqualTo(lit.lex("a"))
-            assertParsed("A").isEqualTo(lit.lex("A"))
-            assertParsed("b").isEqualTo(reLit.lex("b"))
-            assertParsed("C").isEqualTo(reLit.lex("C"))
-            assertParsed("D").isEqualTo(re.lex("D"))
-            assertParsed("e").isEqualTo(re.lex("e"))
-            assertParsed("f").isEqualTo(lam.lex("f"))
-            assertParsed("F").isEqualTo(lam.lex("F"))
-            assertParsed("g").isEqualTo(lamStrict.lex("g"))
-            assertThat(parse("G")).failedWith(NoMatchingToken(0))
-        }
-    }
-
-    @Test
-    fun parseWithNonRootParser() {
-        object : Grammar<SyntaxTree>() {
-            val a by literalToken("a")
-            val b by literalToken("b")
-            val nonRootParser by parser { lexeme(b) }
-            override val root = parser { lexeme(a) }
-        }.run {
-            assertParsed("a").isEqualTo(a.lex())
-            assertThatParsing("b").failedWithTokenMismatch(a, b, 0)
-            assertThat(parse(nonRootParser, "b").getOrThrow()).isEqualTo(b.lex())
-        }
-    }
-
-    companion object {
-
-        private fun parlex(token: Token) = parser { lexeme(token) }
-
-        private fun <T> Grammar<T>.assertParsed(text: String): Assert<T> = assertThat(parseOrThrow(text))
-
-        private fun <T> Grammar<T>.assertThatParsing(text: String): Assert<ParseResult<T>> = assertThat(parse(text))
-
-        private fun node(vararg literals: LiteralToken, startOffset: Int = 0): Node {
-            var offset = startOffset
-            val lexemes = mutableListOf<Lexeme>()
-            for (literal in literals) {
-                val l = literal.lex(offset)
-                lexemes += l
-                offset += l.match.length
-            }
-
-            return Node(lexemes)
-        }
-
-        private fun node(vararg children: SyntaxTree) = Node(*children)
-
-        private fun node(children: List<SyntaxTree>) = Node(children)
-
-        private fun LiteralToken.lex(offset: Int = 0): Lexeme {
-            return Lexeme(TokenMatch(this, offset, string.length), string)
-        }
-
-        private fun Token.lex(text: String, offset: Int = 0): Lexeme {
-            return Lexeme(TokenMatch(this, offset, text.length), text)
-        }
-
-        private fun <T> Assert<ParseResult<T>>.failedWith(parseError: ParseError) {
-            isEqualTo(parseError)
-        }
-
-        private fun <T> Assert<ParseResult<T>>.failedWithNotEnoughRepetition(offset: Int, expectedAtLeast: Int, actualCount: Int) {
-            isInstanceOf(NotEnoughRepetition::class)
-                .all {
-                    prop(NotEnoughRepetition::offset).isEqualTo(offset)
-                    prop(NotEnoughRepetition::expectedAtLeast).isEqualTo(expectedAtLeast)
-                    prop(NotEnoughRepetition::actualCount).isEqualTo(actualCount)
-                }
-        }
-
-        private fun <T> Assert<ParseResult<T>>.failedWithTokenMismatch(expected: Token, actual: Token, offset: Int) {
-            isInstanceOf(MismatchedToken::class)
-                .all {
-                    prop("expected token", MismatchedToken::expected).isEqualTo(expected)
-                    prop("actual lexeme", MismatchedToken::found).all {
-                        prop(TokenMatch::token).isEqualTo(actual)
-                        prop(TokenMatch::offset).isEqualTo(offset)
-                    }
-                }
-        }
-    }
 }

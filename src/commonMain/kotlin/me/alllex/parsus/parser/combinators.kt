@@ -1,15 +1,6 @@
 package me.alllex.parsus.parser
 
 /**
- * Creates a parser from a pair of parsers, returning a pair of their results.
- */
-infix fun <A, B> Parser<A>.and(p: Parser<B>): Parser<Pair<A, B>> = parser(firstTokens) {
-    val a = this@and()
-    val b = p()
-    a to b
-}
-
-/**
  * Applies given function to the result of [this] parser.
  *
  * ```kotlin
@@ -58,14 +49,14 @@ fun <T> Parser<T>.between(left: Parser<*>, right: Parser<*>): Parser<T> = parser
  * }
  * ```
  */
-fun ignored(parser: Parser<*>): Parser<Unit> = parser map Unit
+fun ignored(parser: Parser<*>): Parser<Unit> = SkipParser.of(parser)
 
 /**
  * Returns a new parser that tries to apply the given [parser]
  * and fallbacks to returning null in case of failure.
  *
  * ```kotlin
- * object : Grammar<Pair<String?, String>> {
+ * object : Grammar<Tuple2<String?, String>> {
  *    val title by regexToken("Mrs?\\.?\\s+")
  *    val surname by regexToken("\\w+")
  *    override val root by optional(title) * surname
