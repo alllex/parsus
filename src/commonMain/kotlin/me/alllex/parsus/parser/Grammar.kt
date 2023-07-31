@@ -2,7 +2,6 @@ package me.alllex.parsus.parser
 
 import me.alllex.parsus.token.EofToken
 import me.alllex.parsus.token.Token
-import kotlin.jvm.JvmName
 import kotlin.reflect.KProperty
 
 /**
@@ -108,32 +107,6 @@ abstract class Grammar<out V>(
     @Throws(ParseException::class)
     fun parseEntireOrThrow(input: String): V {
         return parseOrThrow(input)
-    }
-
-    /**
-     * Creates a parser that runs the given parser, but always returns `Unit`.
-     *
-     * @see times
-     */
-    operator fun Parser<*>.unaryMinus(): Parser<Unit> = ignored(this)
-
-    /**
-     * Creates a parser that ignores the result of the first parser and returns the result of the second parser.
-     */
-    @JvmName("ignoredTimesParser")
-    operator fun <T> Parser<Unit>.times(p: Parser<T>): Parser<T> = parser(firstTokens) {
-        this@times()
-        p()
-    }
-
-    /**
-     * Creates a parser that runs both parsers, but only returns the result of the first parser.
-     */
-    @JvmName("parserTimesIgnored")
-    operator fun <T> Parser<T>.times(ignored: Parser<Unit>): Parser<T> = parser(firstTokens) {
-        this@times().also {
-            ignored()
-        }
     }
 
     override fun toString(): String {

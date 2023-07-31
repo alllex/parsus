@@ -26,8 +26,8 @@ class TupleCombinatorsTest {
     }
 
     @Test
-    fun test1() {
-        val a = LiteralToken("a")
+    fun andTests() {
+        val a = ga.a
 
         check(
             parser = a and a,
@@ -87,6 +87,21 @@ class TupleCombinatorsTest {
 
         check<Tuple3<TokenMatch, TokenMatch, Tuple2<TokenMatch, TokenMatch>>>(
             parser = ignored(a) and (a and ignored(a) and a) and (ignored(a) and ignored(a)) and (a and (a and ignored(a))),
+            arity = 2,
+            parserCount = 4,
+            parserClasses = listOf(
+                skipParserClass, tupleParserClass, skipParserClass, tupleParserClass
+            ),
+            parses = "aaaa",
+        )
+    }
+
+    @Test
+    fun timesTests() {
+        val a = ga.a
+
+        check<Tuple3<TokenMatch, TokenMatch, Tuple2<TokenMatch, TokenMatch>>>(
+            parser = -a * (a * -a * a) * (-a * -a) * (a * (a * -a)),
             arity = 2,
             parserCount = 4,
             parserClasses = listOf(
