@@ -29,18 +29,6 @@ suspend fun <R> ParsingScope.choose(p: Parser<R>, ps: List<Parser<R>>): R {
     fail(NoViableAlternative(startOffset))
 }
 
-suspend fun <R : Any> ParsingScope.tryOrNull(p: Parser<R>): R? = tryParse(p).getOrElse { null }
-
-suspend fun <R : Any> ParsingScope.poll(p: Parser<R>): R? = tryOrNull(p)
-
-/**
- * Executes given parser, ignoring the result.
- */
-suspend fun ParsingScope.skip(p: Parser<*>): IgnoredValue {
-    p() // execute parser, but ignore the result
-    return IgnoredValue
-}
-
 /**
  * Returns true if the parser executes successfully (consuming input) and false otherwise (not consuming any input).
  */

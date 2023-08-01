@@ -69,7 +69,7 @@ object FasterJsonGrammar : Grammar<Json>() {
     private val jsonNum by numToken map { Json.Num(it.text.toDouble()) }
     private val jsonStr by str map { Json.Str(it) }
 
-    private val keyValue by str * -colon and ref(::jsonValue)
+    private val keyValue by str and -colon and ref(::jsonValue) map { it.toPair() }
     private val jsonObj by -lbrace * separated(keyValue, comma) * -rbrace map { Json.Obj(it.toMap()) }
 
     private val jsonArr by -lbracket * separated(ref(::jsonValue), comma) * -rbracket map { Json.Arr(it) }
