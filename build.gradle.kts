@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "me.alllex.parsus"
-version = "0.4.10-SNAPSHOT"
+version = "0.5.0"
 
 kotlin {
     sourceSets {
