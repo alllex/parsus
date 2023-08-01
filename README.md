@@ -17,10 +17,11 @@ val booleanGrammar = object : Grammar<Expr>() {
     val or by literalToken("|")
     val impl by literalToken("->")
 
+    val variable by id map { Var(it.text) }
     val negation by -not * ref(::term) map { Not(it) }
     val braced by -lpar * ref(::root) * -rpar
 
-    val term: Parser<Expr> by (id map { Var(it.text) }) or negation or braced
+    val term: Parser<Expr> by variable or negation or braced
 
     val andChain by leftAssociative(term, and, ::And)
     val orChain by leftAssociative(andChain, or, ::Or)
@@ -80,7 +81,7 @@ You can pick and choose the style for each parser and sub-parser, as there are n
 | Parsing a token and getting its text<br/><br/>Parses: `ab`, `aB` | Procedural:<br/><pre>val ab by regexToken("a[bB]")<br/>override val root by parser {<br/>    val abMatch = ab()<br/>    abMatch.text<br/>}</pre>Combinator:<br/><pre>val ab by regexToken("a[bB]")<br/>override val root by ab map { it.text }</pre> |
 | Parsing two tokens sequentially<br/><br/>Parses: `ab`, `aB` | Procedural:<br/><pre>val a by literalToken("a")<br/>val b by regexToken("[bB]")<br/>override val root by parser {<br/>    val aMatch = a()<br/>    val bMatch = b()<br/>    aMatch.text to bMatch.text<br/>}</pre>Combinator:<br/><pre>val a by literalToken("a")<br/>val b by regexToken("[bB]")<br/>override val root by a and b map<br/>    { (aM, bM) -> aM.text to bM.text }</pre> |
 | Parsing one of two tokens<br/><br/>Parses: `a`, `b`, `B` | Procedural:<br/><pre>val a by literalToken("a")<br/>val b by regexToken("[bB]")<br/>override val root by parser {<br/>    val abMatch = choose(a, b)<br/>    abMatch.text<br/>}</pre>Combinator:<br/><pre>val a by literalToken("a")<br/>val b by regexToken("[bB]")<br/>override val root by a or b map { it.text }</pre> |
-| Parsing an optional token<br/><br/>Parses: `ab`, `aB`, `b`, `B` | Procedural:<br/><pre>val a by literalToken("a")<br/>val b by regexToken("[bB]")<br/>override val root by parser {<br/>    val aMatch = poll(a)<br/>    val bMatch = b()<br/>    aMatch?.text to bMatch.text<br/>}</pre>Combinator:<br/><pre>val a by literalToken("a")<br/>val b by regexToken("[bB]")<br/>override val root by optional(a) and b map<br/>    { (aM, bM) -> aM?.text to bM.text }</pre> |
+| Parsing an optional token<br/><br/>Parses: `ab`, `aB`, `b`, `B` | Procedural:<br/><pre>val a by literalToken("a")<br/>val b by regexToken("[bB]")<br/>override val root by parser {<br/>    val aMatch = poll(a)<br/>    val bMatch = b()<br/>    aMatch?.text to bMatch.text<br/>}</pre>Combinator:<br/><pre>val a by literalToken("a")<br/>val b by regexToken("[bB]")<br/>override val root by maybe(a) and b map<br/>    { (aM, bM) -> aM?.text to bM.text }</pre> |
 | Parsing a token and ignoring its value<br/><br/>Parses: `ab`, `aB` | Procedural:<br/><pre>val a by literalToken("a")<br/>val b by regexToken("[bB]")<br/>override val root by parser {<br/>    skip(a) // or just a() without using the value<br/>    val bMatch = b()<br/>    bMatch.text<br/>}</pre>Combinator:<br/><pre>val a by literalToken("a")<br/>val b by regexToken("[bB]")<br/>override val root by -a * b map { it.text }</pre> |
 
 ## Introduction

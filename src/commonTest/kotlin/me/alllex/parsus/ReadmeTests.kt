@@ -32,10 +32,11 @@ class ReadmeTests {
             val or by literalToken("|")
             val impl by literalToken("->")
 
+            val variable by id map { Var(it.text) }
             val negation by -not * ref(::term) map { Not(it) }
             val braced by -lpar * ref(::root) * -rpar
 
-            val term: Parser<BoolExpr> by (id map { Var(it.text) }) or negation or braced
+            val term: Parser<BoolExpr> by variable or negation or braced
 
             val andChain by leftAssociative(term, and, ::And)
             val orChain by leftAssociative(andChain, or, ::Or)
@@ -166,7 +167,7 @@ class ReadmeTests {
         val comb = object : Grammar<Pair<String?, String>>() {
             val a by literalToken("a")
             val b by regexToken("[bB]")
-            override val root by optional(a) and b map
+            override val root by maybe(a) and b map
                 { (aM, bM) -> aM?.text to bM.text }
         }
 
