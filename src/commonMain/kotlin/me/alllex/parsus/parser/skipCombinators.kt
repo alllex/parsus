@@ -33,6 +33,19 @@ operator fun Parser<*>.unaryMinus(): Parser<Unit> = ignored(this)
  *
  * ```kotlin
  * object : Grammar<Tuple2<String?, String>> {
+ *    val title by regexToken("Mrs?\\.?")
+ *    val ws by regexToken("\\s+")
+ *    val surname by regexToken("\\w+")
+ *    override val root by maybe(title) * -maybe(ws) * surname
+ */
+fun <T : Any> maybe(parser: Parser<T>): Parser<T?> = optional(parser)
+
+/**
+ * Creates a new parser that tries to apply the given [parser]
+ * and fallbacks to returning null in case of failure.
+ *
+ * ```kotlin
+ * object : Grammar<Tuple2<String?, String>> {
  *    val title by regexToken("Mrs?\\.?\\s+")
  *    val surname by regexToken("\\w+")
  *    override val root by optional(title) * surname
