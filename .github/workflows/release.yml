@@ -37,7 +37,7 @@ jobs:
 
       - name: Publish the shared and macOS artifacts
         if: matrix.os == 'macOS-latest'
-        run: ./gradlew publishAllPublicationsToMavenCentralRepository --no-parallel
+        run: ./gradlew :publishAllPublicationsToSonatypeRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
@@ -47,7 +47,7 @@ jobs:
 
       - name: Publish the windows artifact
         if: matrix.os == 'windows-latest'
-        run: ./gradlew publishMingwX64PublicationToMavenCentralRepository --no-parallel
+        run: ./gradlew :publishMingwX64PublicationToSonatypeRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
@@ -57,7 +57,7 @@ jobs:
 
       - name: Publish the linux artifact
         if: matrix.os == 'ubuntu-latest'
-        run: ./gradlew publishLinuxX64PublicationToMavenCentralRepository --no-parallel
+        run: ./gradlew :publishLinuxX64PublicationToSonatypeRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
