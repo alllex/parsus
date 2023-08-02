@@ -38,7 +38,6 @@ kotlin {
     //         ├── iosArm64
     //         └── iosX64
 
-    @Suppress("UNUSED_VARIABLE")
     sourceSets {
         val commonMain by getting
         val commonTest by getting
