@@ -1,7 +1,10 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
+  push:
+    tags:
+      - 'v*'
 
 concurrency:
   group: "release"
@@ -37,9 +40,8 @@ jobs:
 
       - name: Publish the shared and macOS artifacts
         if: matrix.os == 'macOS-latest'
-        run: ./gradlew :publishAllPublicationsToSonatypeRepository -x :publishMingwX64PublicationToSonatypeRepository -x :publishLinuxX64PublicationToSonatypeRepository --no-parallel
+        run: ./gradlew :publishAllPublicationsToSonatypeRepository :closeSonatypeStagingRepository -x :publishMingwX64PublicationToSonatypeRepository -x :publishLinuxX64PublicationToSonatypeRepository --no-parallel
         env:
-          MAIN_PUBLISHER_HOST: true
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
           ORG_GRADLE_PROJECT_signingPassword: ${{secrets.SIGNING_PASSWORD}}
@@ -48,7 +50,7 @@ jobs:
 
       - name: Publish the windows artifact
         if: matrix.os == 'windows-latest'
-        run: ./gradlew :publishMingwX64PublicationToSonatypeRepository --no-parallel
+        run: ./gradlew :publishMingwX64PublicationToSonatypeRepository :closeSonatypeStagingRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
@@ -58,7 +60,7 @@ jobs:
 
       - name: Publish the linux artifact
         if: matrix.os == 'ubuntu-latest'
-        run: ./gradlew :publishLinuxX64PublicationToSonatypeRepository --no-parallel
+        run: ./gradlew :publishLinuxX64PublicationToSonatypeRepository :closeSonatypeStagingRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
