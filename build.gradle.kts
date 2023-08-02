@@ -45,23 +45,6 @@ publishing {
     }
 }
 
-val isCI = providers.environmentVariable("CI").orElse("").map { it.isNotEmpty() }
-val isMainHost = providers.environmentVariable("MAIN_PUBLISHER_HOST").orElse("").map { it.isNotEmpty() }
-kotlin {
-    val publicationsFromMainHost =
-        listOf(jvm(), js()).map { it.name } + "kotlinMultiplatform"
-    publishing {
-        publications {
-            matching { it.name in publicationsFromMainHost }.all {
-                val targetPublication = this@all
-                tasks.withType<AbstractPublishToMaven>()
-                    .matching { it.publication == targetPublication }
-                    .configureEach { onlyIf { !isCI.get() || isMainHost.get() } }
-            }
-        }
-    }
-}
-
 nexusPublishing {
     repositories {
         sonatype {
