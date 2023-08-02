@@ -1,4 +1,4 @@
-name: Gradle build
+name: Check
 
 on:
   pull_request:
@@ -22,8 +22,8 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          java-version: 8
           distribution: zulu
+          java-version-file: .github/workflows/.ci-java-version
 
       - name: Cache Kotlin Konan
         id: cache-kotlin-konan
@@ -36,4 +36,4 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-home-cache-cleanup: true
-          arguments: build
+          arguments: check
