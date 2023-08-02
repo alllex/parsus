@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 
 plugins {
     kotlin("multiplatform")
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.6.0"
 }
 
 kotlin {
