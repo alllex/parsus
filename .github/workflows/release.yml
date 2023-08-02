@@ -37,7 +37,7 @@ jobs:
 
       - name: Publish the shared and macOS artifacts
         if: matrix.os == 'macOS-latest'
-        run: ./gradlew :publishAllPublicationsToSonatypeRepository --no-parallel
+        run: ./gradlew :publishAllPublicationsToSonatypeRepository :closeAndReleaseSonatypeStagingRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
@@ -47,7 +47,7 @@ jobs:
 
       - name: Publish the windows artifact
         if: matrix.os == 'windows-latest'
-        run: ./gradlew :publishMingwX64PublicationToSonatypeRepository --no-parallel
+        run: ./gradlew :publishMingwX64PublicationToSonatypeRepository :closeAndReleaseSonatypeStagingRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
@@ -57,17 +57,10 @@ jobs:
 
       - name: Publish the linux artifact
         if: matrix.os == 'ubuntu-latest'
-        run: ./gradlew :publishLinuxX64PublicationToSonatypeRepository --no-parallel
+        run: ./gradlew :publishLinuxX64PublicationToSonatypeRepository :closeAndReleaseSonatypeStagingRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
           ORG_GRADLE_PROJECT_signingPassword: ${{secrets.SIGNING_PASSWORD}}
-          ORG_GRADLE_PROJECT_sonatypeUsername: ${{secrets.SONATYPE_USERNAME}}
-          ORG_GRADLE_PROJECT_sonatypePassword: ${{secrets.SONATYPE_PASSWORD}}
-
-      # https://github.com/gradle-nexus/publish-plugin#publishing-and-closing-in-different-gradle-invocations
-      - name: Release from staging
-        run: ./gradlew findSonatypeStagingRepository closeAndReleaseSonatypeStagingRepository --no-parallel
-        env:
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{secrets.SONATYPE_USERNAME}}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{secrets.SONATYPE_PASSWORD}}

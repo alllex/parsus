@@ -1,12 +1,14 @@
 plugins {
     buildsrc.conventions.`kotlin-multiplatform`
     buildsrc.conventions.`maven-publishing`
-    id("io.github.gradle-nexus.publish-plugin") version "1.2.0"
+    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
     id("org.jetbrains.dokka")
 }
 
+val publishVersion = project.layout.projectDirectory.file("version.txt").asFile.readText().trim()
+
 group = "me.alllex.parsus"
-version = "0.5.1-SNAPSHOT"
+version = publishVersion
 
 kotlin {
     sourceSets {
