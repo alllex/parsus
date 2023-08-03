@@ -54,7 +54,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("me.alllex.parsus:parsus:0.5.0")
+                implementation("me.alllex.parsus:parsus:0.5.4")
             }
         }
     }
