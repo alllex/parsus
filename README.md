@@ -2,7 +2,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/me.alllex.parsus/parsus.svg?color=success)](https://search.maven.org/search?q=g:me.alllex.parsus)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Gradle build](https://github.com/alllex/parsus/actions/workflows/gradle.yml/badge.svg)](https://github.com/alllex/parsus/actions/workflows/gradle.yml)
+[![Gradle build](https://github.com/alllex/parsus/actions/workflows/check.yml/badge.svg)](https://github.com/alllex/parsus/actions/workflows/check.yml)
 
 A framework for writing composable parsers for JVM, JS and Kotlin/Native based on Kotlin Coroutines.
 
@@ -35,23 +35,47 @@ val ast = booleanGrammar.parse("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a").ge
 
 ## Usage
 
-Using with Gradle:
+<details open>
+<summary>Using with Gradle for JVM projects</summary>
 
 ```kotlin
 dependencies {
-    implementation("me.alllex.parsus:parsus-jvm:0.4.0")
+    implementation("me.alllex.parsus:parsus-jvm:0.5.4")
 }
 ```
 
-Using with Maven:
+</details>
+
+<details open>
+<summary>Using with Gradle for Multiplatform projects</summary>
+
+```kotlin
+kotlin {
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation("me.alllex.parsus:parsus:0.5.0")
+            }
+        }
+    }
+}
+```
+
+</details>
+
+
+<details>
+<summary>Using with Maven for JVM projects</summary>
 
 ```xml
 <dependency>
   <groupId>me.alllex.parsus</groupId>
   <artifactId>parsus-jvm</artifactId>
-  <version>0.4.0</version>
+  <version>0.5.4</version>
 </dependency>
 ```
+
+</details>
 
 ## Features
 
