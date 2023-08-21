@@ -22,7 +22,7 @@ class RegexToken(
         return match.value.length
     }
 
-    override fun toString(): String = "RegexToken(${name ?: ""} [$pattern]${if (ignored) " [ignored]" else ""})"
+    override fun toString(): String = "RegexToken(${name?.let { "$it " } ?: ""}[$pattern]${if (ignored) " [ignored]" else ""})"
 }
 
 private fun Regex.withIgnoreCase(ignoreCase: Boolean) =
