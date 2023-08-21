@@ -18,10 +18,20 @@ internal class Lexer(
 
     init {
         tokensByFirstChar = mutableMapOf<Char, MutableList<Token>>()
+        val unknownFirstCharTokens = mutableListOf<Token>()
         for (token in tokens) {
             val firstChars = token.firstChars
-            for (c in firstChars) {
-                tokensByFirstChar.getOrPut(c) { mutableListOf() }.add(token)
+            if (firstChars.isEmpty()) {
+                // If the token first char is unknown, then the first char heuristic cannot be applied.
+                // Therefore, we assume that such tokens can start with any character and put them in appropriate buckets
+                // to ensure the token priority correctness.
+                unknownFirstCharTokens += token
+                tokensByFirstChar.values.forEach { it += token }
+            } else {
+                for (c in firstChars) {
+                    tokensByFirstChar.getOrPut(c) { unknownFirstCharTokens.toMutableList() }
+                        .add(token)
+                }
             }
         }
     }
@@ -54,14 +64,12 @@ internal class Lexer(
         if (fromIndex < input.length) {
             val nextChar = input[fromIndex]
             val byFirstChar = tokensByFirstChar[nextChar].orEmpty()
-            for (i in byFirstChar.indices) {
-                val token = byFirstChar[i]
+            for (token in byFirstChar) {
                 matchImpl(fromIndex, token)?.let { return it }
             }
         }
 
-        for (i in tokens.indices) {
-            val token = tokens[i]
+        for (token in tokens) {
             matchImpl(fromIndex, token)?.let { return it }
         }
         return null

@@ -15,15 +15,12 @@ internal class ChoiceParser<out T>(
                 val pendingUnknownFirstTokens = mutableListOf<Parser<T>>()
                 for (parser in parsers) {
                     if (parser.hasUnknownFirstTokens()) {
-                        values.forEach { it.add(parser) }
                         pendingUnknownFirstTokens += parser
+                        values.forEach { it += parser }
                     } else {
                         for (token in parser.firstTokens) {
-                            val parsersForToken = getOrPut(token) { mutableListOf() }
-                            if (parsersForToken.isEmpty()) {
-                                parsersForToken += pendingUnknownFirstTokens
-                            }
-                            parsersForToken.add(parser)
+                            val parsersForToken = getOrPut(token) { pendingUnknownFirstTokens.toMutableList() }
+                            parsersForToken += parser
                         }
                     }
                 }
