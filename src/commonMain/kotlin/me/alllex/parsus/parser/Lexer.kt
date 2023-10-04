@@ -12,9 +12,10 @@ internal class Lexer(
     private val tokens: List<Token>,
 ) {
 
+    private val ignoredTokens = tokens.filter { it.ignored }
     private val tokensByFirstChar: Map<Char, List<Token>>
-    private var cachedFromIndex: Int = -1
-    private var cachedTokenMatch: TokenMatch? = null
+//    private var cachedFromIndex: Int = -1
+//    private var cachedTokenMatch: TokenMatch? = null
 
     init {
         tokensByFirstChar = mutableMapOf<Char, MutableList<Token>>()
@@ -36,14 +37,36 @@ internal class Lexer(
         }
     }
 
-    fun findMatch(fromIndex: Int): TokenMatch? {
-        if (fromIndex == cachedFromIndex && cachedTokenMatch != null) {
-            return cachedTokenMatch
+    fun findMatchOf(fromIndex: Int, targetToken: Token): TokenMatch? {
+        var pos = fromIndex
+        while (true) {
+            matchImpl(pos, targetToken)?.let { return it }
+
+            val preIgnorePos = pos
+            for (ignoredToken in ignoredTokens) {
+                val ignoredMatch = matchImpl(pos, ignoredToken)
+                if (ignoredMatch != null) {
+                    pos = ignoredMatch.offset + ignoredMatch.length
+                    break
+                }
+            }
+
+            if (preIgnorePos == pos) {
+                // No ignored tokens matched, so we can't find the target token
+                return null
+            }
         }
+        // The loop will exit via a mismatch, because no tokens can match "after the end of input"
+    }
+
+    fun findMatch(fromIndex: Int): TokenMatch? {
+//        if (fromIndex == cachedFromIndex && cachedTokenMatch != null) {
+//            return cachedTokenMatch
+//        }
 
         val foundTokenMatch = findMatchIgnoring(fromIndex)
-        cachedFromIndex = fromIndex
-        cachedTokenMatch = foundTokenMatch
+//        cachedFromIndex = fromIndex
+//        cachedTokenMatch = foundTokenMatch
         return foundTokenMatch
     }
 

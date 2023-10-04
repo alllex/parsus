@@ -5,7 +5,9 @@ import me.alllex.parsus.token.TokenMatch
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.coroutines.intrinsics.*
+import kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED
+import kotlin.coroutines.intrinsics.createCoroutineUnintercepted
+import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 
 /**
  * Executes parsers, keeping track of current position in the input and error-continuations.
@@ -39,8 +41,9 @@ internal class ParsingContext(
 
     override val currentOffset: Int get() = position
 
+    // TODO: clean up
     override val currentToken: TokenMatch?
-        get() = lexer.findMatch(position)
+        get() = null // lexer.findMatch(position)
 
     override suspend fun <R> Parser<R>.invoke(): R = parse()
 
@@ -55,8 +58,9 @@ internal class ParsingContext(
 
     override fun tryParse(token: Token): ParseResult<TokenMatch> {
         val fromIndex = this.position
-        val match = lexer.findMatch(fromIndex)
-            ?: return NoMatchingToken(fromIndex)
+        val match = lexer.findMatchOf(fromIndex, token)
+            ?: return UnmatchedToken(token, fromIndex)
+        // TODO: clean up, as this should not happen anymore
         if (match.token != token) return MismatchedToken(token, match)
         this.position = match.offset + match.length
         return ParsedValue(match)

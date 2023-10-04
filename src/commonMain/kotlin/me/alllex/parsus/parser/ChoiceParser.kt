@@ -29,8 +29,9 @@ internal class ChoiceParser<out T>(
     private val unknownFirstTokenParsers = parsers.filter { it.hasUnknownFirstTokens() }
 
     override suspend fun ParsingScope.parse(): T {
-        val currentToken = currentToken?.token ?: fail(NoMatchingToken(currentOffset))
-        val parsers = parsersByFirstToken[currentToken] ?: unknownFirstTokenParsers
+        // TODO: clean up
+//        val currentToken = currentToken?.token ?: fail(NoMatchingToken(currentOffset))
+//        val parsers = parsersByFirstToken[currentToken] ?: unknownFirstTokenParsers
         for (parser in parsers) {
             val r = tryParse(parser)
             if (r is ParsedValue) return r.value
