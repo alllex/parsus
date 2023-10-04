@@ -21,9 +21,9 @@ class Tests {
             override val root = parser { node(lexeme(a) + lexeme(b)) }
         }
 
-        assertThat(g.parse("bb")).failedWithTokenMismatch(expected = g.a, actual = g.b, offset = 0)
-        assertThat(g.parse("aa")).failedWithTokenMismatch(expected = g.b, actual = EofToken, offset = 2)
-        assertThat(g.parse("aabbaa")).failedWithTokenMismatch(expected = EofToken, actual = g.a, offset = 4)
+        assertThat(g.parse("bb")).failedWithUnmatchedToken(expected = g.a, offset = 0)
+        assertThat(g.parse("aa")).failedWithUnmatchedToken(expected = g.b, offset = 2)
+        assertThat(g.parse("aabbaa")).failedWithUnmatchedToken(expected = EofToken, offset = 4)
     }
 
     @Test
@@ -256,7 +256,7 @@ class Tests {
             }
         }.run {
             assertParsed("ab").isEqualTo(b.lex(1))
-            assertThatParsing("b").failedWithTokenMismatch(a, b, offset = 0)
+            assertThatParsing("b").failedWithUnmatchedToken(a, offset = 0)
         }
     }
 
@@ -275,7 +275,7 @@ class Tests {
             assertParsed("a").isEqualTo(true to false)
             assertParsed("b").isEqualTo(false to true)
             assertParsed("").isEqualTo(false to false)
-            assertThatParsing("aa").failedWithTokenMismatch(EofToken, a, offset = 1)
+            assertThatParsing("aa").failedWithUnmatchedToken(EofToken, offset = 1)
         }
     }
 
@@ -291,7 +291,7 @@ class Tests {
             assertThat(g.parseOrThrow("b")).isEqualTo(node(g.b))
             assertThat(g.parseOrThrow("ab")).isEqualTo(node(g.a, g.b))
             assertThat(g.parseOrThrow("aab")).isEqualTo(node(g.a, g.a, g.b))
-            assertThat(g.parse("")).failedWithTokenMismatch(g.b, EofToken, offset = 0)
+            assertThat(g.parse("")).failedWithUnmatchedToken(g.b, offset = 0)
         }
     }
 
@@ -322,7 +322,7 @@ class Tests {
             assertThat(g.parseOrThrow("baab")).isEqualTo(node(g.b, g.a, g.a, g.b))
             assertThat(g.parseOrThrow("baaab")).isEqualTo(node(g.b, g.a, g.a, g.a, g.b))
             assertThat(g.parse("bab")).failedWithNotEnoughRepetition(1, 2, 1)
-            assertThat(g.parse("baaaab")).failedWithTokenMismatch(g.b, g.a, offset = 4)
+            assertThat(g.parse("baaaab")).failedWithUnmatchedToken(g.b, offset = 4)
         }
 
         object : Grammar<SyntaxTree>() {

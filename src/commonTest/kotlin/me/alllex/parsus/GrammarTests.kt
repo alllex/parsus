@@ -75,7 +75,7 @@ class GrammarTests {
             override val root = parser { lexeme(a) }
         }.run {
             assertParsed("a").isEqualTo(a.lex())
-            assertThatParsing("b").failedWithTokenMismatch(a, b, 0)
+            assertThatParsing("b").failedWithUnmatchedToken(a, 0)
             assertThat(parse(nonRootParser, "b").getOrThrow()).isEqualTo(b.lex())
         }
     }

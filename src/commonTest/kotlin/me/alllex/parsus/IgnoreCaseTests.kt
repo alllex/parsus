@@ -2,7 +2,7 @@ package me.alllex.parsus
 
 import assertk.assertions.isEqualTo
 import me.alllex.parsus.parser.Grammar
-import me.alllex.parsus.parser.NoMatchingToken
+import me.alllex.parsus.parser.NoViableAlternative
 import me.alllex.parsus.parser.or
 import me.alllex.parsus.parser.parser
 import me.alllex.parsus.token.literalToken
@@ -72,7 +72,7 @@ class IgnoreCaseTests {
             assertParsed("f").isEqualTo(lam.lex("f"))
             assertParsed("F").isEqualTo(lam.lex("F"))
             assertParsed("g").isEqualTo(lamStrict.lex("g"))
-            assertNotParsed("G").failedWith(NoMatchingToken(0))
+            assertNotParsed("G").failedWith(NoViableAlternative(0))
         }
     }
 
