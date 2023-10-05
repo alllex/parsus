@@ -12,10 +12,24 @@ internal class ScannerlessTokenizer(
     input: String,
     tokens: List<Token>,
     traceTokenMatching: Boolean = false,
-): AbstractTokenizer(input, tokens, traceTokenMatching) {
+) : AbstractTokenizer(input, tokens, traceTokenMatching) {
 
     private val ignoredTokens = tokens.filter { it.ignored }
 
+    // We cache one mismatch and one match of ignored tokens.
+    // This is for the frequent case, when there is exactly one ignored token before the target token.
+    // Example:
+    //   parser = t1 or t2 or t3, ws = ignored whitespace
+    //   input = " t3"
+    // In this example, t1 will fail to match at 0, but ws will match at 0, so we cache the match.
+    // Then t1 will try to match at 1, but it will fail again, so we try ignored tokens again,
+    // but this time we get a mismatch, which we cache separately. This fails the t1 branch of the parser.
+    // Now, we backtrack and try t2 at 0, which fails.
+    // But we can avoid rematching ws at 0, because we cached this match.
+    // Then we try t2 at position 1, which fails. But we don't retry ws, because we cached the mismatch.
+    // In the last t3 branch, we try t3 at 0, which fails, but then we skip rematching ws at 0,
+    // because it is still cached. Then t3 succeeds at 0, and parsing succeeds.
+    private var cacheIgnoredMismatchFromIndex = -1
     private var cachedIgnoredFromIndex: Int = -1
     private var cachedIgnoredTokenMatch: TokenMatch? = null
 
@@ -48,6 +62,11 @@ internal class ScannerlessTokenizer(
     }
 
     private fun matchIgnored(fromIndex: Int): TokenMatch? {
+        require(fromIndex >= 0) { "fromIndex must be non-negative, but was $fromIndex" }
+
+        if (fromIndex == cacheIgnoredMismatchFromIndex) {
+            return null
+        }
         if (fromIndex == cachedIgnoredFromIndex) {
             return cachedIgnoredTokenMatch
         }
@@ -60,8 +79,12 @@ internal class ScannerlessTokenizer(
             }
         }
 
-        cachedIgnoredFromIndex = fromIndex
-        cachedIgnoredTokenMatch = match
+        if (match == null) {
+            cacheIgnoredMismatchFromIndex = fromIndex
+        } else {
+            cachedIgnoredFromIndex = fromIndex
+            cachedIgnoredTokenMatch = match
+        }
         return match
     }
 
