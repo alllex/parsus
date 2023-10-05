@@ -24,8 +24,16 @@ fun formatTokenMatchingTrace(
     lookBehind: Int = 5,
     lookAhead: Int = 20,
 ): String {
+
+    val input = trace.input.let { rawInput ->
+        buildString {
+            for (char in rawInput) {
+                append(replaceNonPrintable(char))
+            }
+        }
+    }
+
     val sb = StringBuilder()
-    val input = trace.input
     var lastMismatchOffset = -1
     for (event in trace.events) {
         val offset = event.offset
@@ -36,19 +44,29 @@ fun formatTokenMatchingTrace(
         if (match != null || offset != lastMismatchOffset) {
             val rawToOffset = offset + matchLength + lookAhead
             val toOffset = rawToOffset.coerceAtMost(input.length)
-            val displayLineLength = lookBehind + matchLength + lookAhead + 1
-            sb.append("_".repeat(displayLineLength.coerceAtMost(input.length)))
+            val inputDisplayLineLength = lookBehind + (matchLength + lookAhead).coerceAtMost(input.length) + 1
+            sb.append("_".repeat(inputDisplayLineLength))
             sb.appendLine()
 
+            var inputDisplayLinePrintedLength = 0
             val prefix = when {
-                offset <= lookBehind -> " ".repeat(lookBehind - offset + 1) + input.substring(0, offset)
+                offset <= lookBehind -> "·".repeat(lookBehind - offset + 1) + input.substring(0, offset)
                 else -> "…" + input.substring(offset - lookBehind, offset)
             }
             sb.append(prefix)
+            inputDisplayLinePrintedLength += prefix.length
 
-            sb.append(input.substring(offset, toOffset))
+            val inputChunkAtOffset = input.substring(offset, toOffset)
+            sb.append(inputChunkAtOffset)
+            inputDisplayLinePrintedLength += inputChunkAtOffset.length
+
             if (toOffset < input.length) {
                 sb.append("…")
+                inputDisplayLinePrintedLength += 1
+            }
+
+            if (inputDisplayLinePrintedLength < inputDisplayLineLength) {
+                sb.append("·".repeat(inputDisplayLineLength - inputDisplayLinePrintedLength))
             }
             sb.appendLine()
         }
@@ -63,4 +81,14 @@ fun formatTokenMatchingTrace(
         sb.appendLine()
     }
     return sb.toString()
+}
+
+private fun replaceNonPrintable(char: Char): Char {
+    return when (char) {
+        ' ' -> '␣' // U+2423 OPEN BOX
+        '\n' -> '␤' // U+2424 SYMBOL FOR NEWLINE
+        '\r' -> '␍' // U+240D SYMBOL FOR CARRIAGE RETURN
+        '\t' -> '␉' // U+2409 SYMBOL FOR HORIZONTAL TABULATION
+        else -> char
+    }
 }
