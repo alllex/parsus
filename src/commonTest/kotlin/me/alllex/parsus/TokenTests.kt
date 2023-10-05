@@ -1,12 +1,12 @@
 package me.alllex.parsus
 
 import assertk.assertions.isEqualTo
-import me.alllex.parsus.parser.Grammar
-import me.alllex.parsus.parser.map
-import me.alllex.parsus.parser.or
+import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.TokenMatch
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.regexToken
+import me.alllex.parsus.tree.SyntaxTree
+import me.alllex.parsus.tree.lexeme
 import kotlin.test.Test
 
 class TokenTests {
@@ -32,6 +32,36 @@ class TokenTests {
             override val root by double or single
         }.run {
             assertParsed("<<").isEqualTo(TokenMatch(double, 0, 2))
+        }
+    }
+
+    @Test
+    fun explicitIgnoredTokenParsing() {
+        object : Grammar<SyntaxTree>() {
+            val ws by regexToken("\\s+", ignored = true)
+            val a by literalToken("a")
+            override val root by parser {
+                val a1 = lexeme(a)
+                val w = lexeme(ws)
+                val a2 = lexeme(a)
+                node(a1, w, a2)
+            }
+        }.run {
+            assertParsed("a a").isEqualTo(node(a.lex("a", 0), ws.lex(" ", 1), a.lex("a", 2)))
+            assertParsed(" a a ").isEqualTo(node(a.lex("a", 1), ws.lex(" ", 2), a.lex("a", 3)))
+            assertNotParsed("aa").failedWithUnmatchedToken(ws, 1)
+            assertNotParsed(" aa").failedWithUnmatchedToken(ws, 2)
+        }
+
+        object : Grammar<SyntaxTree>() {
+            val ws by regexToken("\\s+", ignored = true)
+            val a by literalToken("a")
+            override val root by parlex(a) and (-ws * parlex(a)) map { node(it.first, it.second) }
+        }.run {
+            assertParsed("a a").isEqualTo(node(a.lex("a", 0), a.lex("a", 2)))
+            assertParsed(" a a ").isEqualTo(node(a.lex("a", 1), a.lex("a", 3)))
+            assertNotParsed("aa").failedWithUnmatchedToken(ws, 1)
+            assertNotParsed(" aa").failedWithUnmatchedToken(ws, 2)
         }
     }
 
