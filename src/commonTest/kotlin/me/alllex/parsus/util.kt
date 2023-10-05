@@ -82,3 +82,11 @@ fun <T> Assert<ParseResult<T>>.failedWithTokenMismatch(expected: Token, actual: 
             }
         }
 }
+
+fun <T> Assert<ParseResult<T>>.failedWithUnmatchedToken(expected: Token, offset: Int) {
+    isInstanceOf(UnmatchedToken::class)
+        .all {
+            prop("expected token", UnmatchedToken::expected).isEqualTo(expected)
+            prop("offset", UnmatchedToken::offset).isEqualTo(offset)
+        }
+}

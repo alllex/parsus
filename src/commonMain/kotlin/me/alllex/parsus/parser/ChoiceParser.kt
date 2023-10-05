@@ -2,12 +2,19 @@ package me.alllex.parsus.parser
 
 import me.alllex.parsus.token.Token
 
-internal class ChoiceParser<out T>(
+private fun Parser<*>.hasUnknownFirstTokens() = firstTokens.isEmpty()
+private fun List<Parser<*>>.hasUnknownFirstTokens() = any { it.hasUnknownFirstTokens() }
+
+internal abstract class AbstractChoiceParser<T>(
     val parsers: List<Parser<T>>,
 ) : ParserImpl<T>(
     null,
     firstTokens = if (parsers.hasUnknownFirstTokens()) emptySet() else parsers.flatMap { it.firstTokens }.toSet()
-) {
+)
+
+internal class EagerChoiceParser<T>(
+    parsers: List<Parser<T>>,
+) : AbstractChoiceParser<T>(parsers) {
 
     private val parsersByFirstToken: Map<Token, List<Parser<T>>> =
         mutableMapOf<Token, MutableList<Parser<T>>>()
@@ -28,6 +35,7 @@ internal class ChoiceParser<out T>(
 
     private val unknownFirstTokenParsers = parsers.filter { it.hasUnknownFirstTokens() }
 
+    @Suppress("DEPRECATION")
     override suspend fun ParsingScope.parse(): T {
         val currentToken = currentToken?.token ?: fail(NoMatchingToken(currentOffset))
         val parsers = parsersByFirstToken[currentToken] ?: unknownFirstTokenParsers
@@ -37,12 +45,25 @@ internal class ChoiceParser<out T>(
         }
         fail(NoViableAlternative(currentOffset))
     }
+}
 
-    companion object {
-        private fun Parser<*>.hasUnknownFirstTokens() = firstTokens.isEmpty()
-        private fun List<Parser<*>>.hasUnknownFirstTokens() = any { it.hasUnknownFirstTokens() }
+internal class ScannerlessChoiceParser<T>(
+    parsers: List<Parser<T>>,
+) : AbstractChoiceParser<T>(parsers) {
+
+    override suspend fun ParsingScope.parse(): T {
+        for (parser in parsers) {
+            val r = tryParse(parser)
+            if (r is ParsedValue) return r.value
+        }
+        fail(NoViableAlternative(currentOffset))
     }
 }
+
+@Suppress("FunctionName")
+private fun <T> ChoiceParser(parsers: List<Parser<T>>) =
+    // EagerChoiceParser can only be used with EagerTokenizer
+    ScannerlessChoiceParser(parsers)
 
 /**
  * Creates a combined parser that will try the receiver parser first,
@@ -55,8 +76,8 @@ internal class ChoiceParser<out T>(
  * ```
  */
 infix fun <R> Parser<R>.or(p: Parser<R>): Parser<R> = when {
-    this is ChoiceParser && p is ChoiceParser -> ChoiceParser(parsers + p.parsers)
-    this is ChoiceParser -> ChoiceParser(parsers + p)
-    p is ChoiceParser -> ChoiceParser(listOf(this) + p.parsers)
+    this is AbstractChoiceParser && p is AbstractChoiceParser -> ChoiceParser(parsers + p.parsers)
+    this is AbstractChoiceParser -> ChoiceParser(parsers + p)
+    p is AbstractChoiceParser -> ChoiceParser(listOf(this) + p.parsers)
     else -> ChoiceParser(listOf(this, p))
 }

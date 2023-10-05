@@ -77,7 +77,7 @@ fun formatTokenMatchingTrace(
         sb.append(" ".repeat(lookBehind + 1))
         sb.append(matchSymbol.repeat(matchLength.coerceAtLeast(1)))
         sb.append(" [$offset").append(if (match != null) " - ${offset + matchLength - 1}" else "")
-            .append("] ").append(event.token)
+            .append("] ").append(event.token.name?.let { "$it " } ?: "").append(event.token)
         sb.appendLine()
     }
     return sb.toString()

@@ -2,10 +2,13 @@ package me.alllex.parsus.parser
 
 import me.alllex.parsus.token.Token
 import me.alllex.parsus.token.TokenMatch
+import me.alllex.parsus.tokenizer.Tokenizer
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.coroutines.intrinsics.*
+import kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED
+import kotlin.coroutines.intrinsics.createCoroutineUnintercepted
+import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 
 /**
  * Executes parsers, keeping track of current position in the input and error-continuations.
@@ -13,7 +16,7 @@ import kotlin.coroutines.intrinsics.*
  * For each [run][runParser] a new context must be created.
  */
 internal class ParsingContext(
-    private val lexer: Lexer,
+    private val tokenizer: Tokenizer,
     private val debugMode: Boolean = false
 ) : ParsingScope {
 
@@ -35,12 +38,12 @@ internal class ParsingContext(
         return result.getOrThrow() as ParseResult<T>
     }
 
-    override val TokenMatch.text: String get() = lexer.input.substring(offset, offset + length)
+    override val TokenMatch.text: String get() = tokenizer.input.substring(offset, offset + length)
 
     override val currentOffset: Int get() = position
 
     override val currentToken: TokenMatch?
-        get() = lexer.findMatch(position)
+        get() = tokenizer.findContextFreeMatch(position)
 
     override suspend fun <R> Parser<R>.invoke(): R = parse()
 
@@ -55,8 +58,9 @@ internal class ParsingContext(
 
     override fun tryParse(token: Token): ParseResult<TokenMatch> {
         val fromIndex = this.position
-        val match = lexer.findMatch(fromIndex)
-            ?: return NoMatchingToken(fromIndex)
+        val match = tokenizer.findMatchOf(fromIndex, token)
+            ?: return UnmatchedToken(token, fromIndex)
+        // TODO: clean up, as this should not happen anymore
         if (match.token != token) return MismatchedToken(token, match)
         this.position = match.offset + match.length
         return ParsedValue(match)

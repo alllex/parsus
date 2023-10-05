@@ -16,6 +16,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation("com.willowtreeapps.assertk:assertk:0.26.1")
+                runtimeOnly(kotlin("reflect"))
             }
         }
     }

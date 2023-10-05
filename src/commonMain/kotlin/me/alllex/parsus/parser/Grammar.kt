@@ -3,6 +3,7 @@ package me.alllex.parsus.parser
 import me.alllex.parsus.annotations.ExperimentalParsusApi
 import me.alllex.parsus.token.EofToken
 import me.alllex.parsus.token.Token
+import me.alllex.parsus.tokenizer.ScannerlessTokenizer
 import me.alllex.parsus.trace.TokenMatchingTrace
 import me.alllex.parsus.trace.TracedParseResult
 import kotlin.reflect.KProperty
@@ -159,18 +160,20 @@ abstract class Grammar<out V>(
 
     private fun <T> parseEntire(parser: Parser<T>, input: String): ParseResult<T> {
         beforeParsing()
-        val lexer = Lexer(input, _tokens)
-        val parsingContext = ParsingContext(lexer, debugMode)
+        // If tokenizer impl is changed to EagerTokenizer, then ChoiceParser impl has to be changed to EagerChoiceParser
+        val tokenizer = ScannerlessTokenizer(input, _tokens)
+        val parsingContext = ParsingContext(tokenizer, debugMode)
         return parsingContext.runParser(createUntilEofParser(parser))
     }
 
     @ExperimentalParsusApi
     private fun <T> parseTracingEntire(parser: Parser<T>, input: String): TracedParseResult<T, TokenMatchingTrace> {
         beforeParsing()
-        val lexer = Lexer(input, _tokens, traceTokenMatching = true)
-        val parsingContext = ParsingContext(lexer, debugMode)
+        // If tokenizer impl is changed to EagerTokenizer, then ChoiceParser impl has to be changed to EagerChoiceParser
+        val tokenizer = ScannerlessTokenizer(input, _tokens, traceTokenMatching = true)
+        val parsingContext = ParsingContext(tokenizer, debugMode)
         val result = parsingContext.runParser(createUntilEofParser(parser))
-        val trace = lexer.getTokenMatchingTrace() ?: error("Token matching trace is not available")
+        val trace = tokenizer.getTokenMatchingTrace() ?: error("Token matching trace is not available")
         return TracedParseResult(result, trace)
     }
 

@@ -26,6 +26,8 @@ abstract class ParseError : ParseResult<Nothing>() {
     override fun toString(): String = "ParseError"
 }
 
+data class UnmatchedToken(val expected: Token, override val offset: Int) : ParseError()
+
 data class MismatchedToken(val expected: Token, val found: TokenMatch) : ParseError() {
     override val offset: Int get() = found.offset
 }

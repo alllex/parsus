@@ -1,27 +1,23 @@
-package me.alllex.parsus.parser
+package me.alllex.parsus.tokenizer
 
-import me.alllex.parsus.annotations.ExperimentalParsusApi
 import me.alllex.parsus.token.Token
 import me.alllex.parsus.token.TokenMatch
-import me.alllex.parsus.trace.TokenMatchingEvent
-import me.alllex.parsus.trace.TokenMatchingTrace
 
 /**
- * Lexer is responsible for [finding][findMatch] token-matches in the given position
- * in the input string.
+ * This tokenizer eagerly tries to match tokens from the input,
+ * based on the full token set ordered by priority.
+ * It deterministically matches tokens from the input,
+ * not taking into account tokens expected by parsers.
  */
-@OptIn(ExperimentalParsusApi::class)
-internal class Lexer(
-    val input: String,
-    private val tokens: List<Token>,
+internal class EagerTokenizer(
+    input: String,
+    tokens: List<Token>,
     traceTokenMatching: Boolean = false,
-) {
+) : AbstractTokenizer(input, tokens, traceTokenMatching) {
 
     private val tokensByFirstChar: Map<Char, List<Token>>
     private var cachedFromIndex: Int = -1
     private var cachedTokenMatch: TokenMatch? = null
-
-    private val traceEvents: MutableList<TokenMatchingEvent>? = if (traceTokenMatching) mutableListOf() else null
 
     init {
         tokensByFirstChar = mutableMapOf<Char, MutableList<Token>>()
@@ -43,11 +39,15 @@ internal class Lexer(
         }
     }
 
-    internal fun getTokenMatchingTrace(): TokenMatchingTrace? {
-        return traceEvents?.let { TokenMatchingTrace(input, it) }
+    override fun findContextFreeMatch(fromIndex: Int): TokenMatch? {
+        return findMatchCaching(fromIndex)
     }
 
-    fun findMatch(fromIndex: Int): TokenMatch? {
+    override fun findMatchOf(fromIndex: Int, targetToken: Token): TokenMatch? {
+        return findMatchCaching(fromIndex)
+    }
+
+    private fun findMatchCaching(fromIndex: Int): TokenMatch? {
         if (fromIndex == cachedFromIndex && cachedTokenMatch != null) {
             return cachedTokenMatch
         }
@@ -84,25 +84,5 @@ internal class Lexer(
             matchImpl(fromIndex, token)?.let { return it }
         }
         return null
-    }
-
-    private fun matchImpl(fromIndex: Int, token: Token): TokenMatch? {
-        val length = token.match(input, fromIndex)
-        if (length == 0) {
-            traceMismatch(token, fromIndex)
-            return null
-        }
-
-        val match = TokenMatch(token, fromIndex, length)
-        traceMatch(token, match)
-        return match
-    }
-
-    private fun traceMismatch(token: Token, offset: Int) {
-        traceEvents?.add(TokenMatchingEvent(token, offset, null))
-    }
-
-    private fun traceMatch(token: Token, match: TokenMatch) {
-        traceEvents?.add(TokenMatchingEvent(token, match.offset, match))
     }
 }
