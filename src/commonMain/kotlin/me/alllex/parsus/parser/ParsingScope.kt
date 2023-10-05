@@ -45,6 +45,7 @@ interface ParsingScope {
     /**
      * The token at the current offset in the input.
      */
+    @Deprecated("The new \"scannerless\" parsing approach does not eagerly tokenize the input. The `currentToken` is always null.")
     val currentToken: TokenMatch?
 
     /**

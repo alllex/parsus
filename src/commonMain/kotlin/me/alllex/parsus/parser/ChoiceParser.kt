@@ -35,6 +35,7 @@ internal class EagerChoiceParser<T>(
 
     private val unknownFirstTokenParsers = parsers.filter { it.hasUnknownFirstTokens() }
 
+    @Suppress("DEPRECATION")
     override suspend fun ParsingScope.parse(): T {
         val currentToken = currentToken?.token ?: fail(NoMatchingToken(currentOffset))
         val parsers = parsersByFirstToken[currentToken] ?: unknownFirstTokenParsers
