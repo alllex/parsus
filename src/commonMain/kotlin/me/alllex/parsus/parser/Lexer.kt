@@ -1,21 +1,28 @@
 package me.alllex.parsus.parser
 
+import me.alllex.parsus.annotations.ExperimentalParsusApi
 import me.alllex.parsus.token.Token
 import me.alllex.parsus.token.TokenMatch
+import me.alllex.parsus.trace.TokenMatchingEvent
+import me.alllex.parsus.trace.TokenMatchingTrace
 
 /**
  * Lexer is responsible for [finding][findMatch] token-matches in the given position
  * in the input string.
  */
+@OptIn(ExperimentalParsusApi::class)
 internal class Lexer(
     val input: String,
     private val tokens: List<Token>,
+    traceTokenMatching: Boolean = false,
 ) {
 
     private val ignoredTokens = tokens.filter { it.ignored }
     private val tokensByFirstChar: Map<Char, List<Token>>
 //    private var cachedFromIndex: Int = -1
 //    private var cachedTokenMatch: TokenMatch? = null
+
+    private val traceEvents: MutableList<TokenMatchingEvent>? = if (traceTokenMatching) mutableListOf() else null
 
     init {
         tokensByFirstChar = mutableMapOf<Char, MutableList<Token>>()
@@ -35,6 +42,10 @@ internal class Lexer(
                 }
             }
         }
+    }
+
+    internal fun getTokenMatchingTrace(): TokenMatchingTrace? {
+        return traceEvents?.let { TokenMatchingTrace(input, it) }
     }
 
     fun findMatchOf(fromIndex: Int, targetToken: Token): TokenMatch? {
@@ -100,7 +111,21 @@ internal class Lexer(
 
     private fun matchImpl(fromIndex: Int, token: Token): TokenMatch? {
         val length = token.match(input, fromIndex)
-        if (length == 0) return null
-        return TokenMatch(token, fromIndex, length)
+        if (length == 0) {
+            traceMismatch(token, fromIndex)
+            return null
+        }
+
+        val match = TokenMatch(token, fromIndex, length)
+        traceMatch(token, match)
+        return match
+    }
+
+    private fun traceMismatch(token: Token, offset: Int) {
+        traceEvents?.add(TokenMatchingEvent(token, offset, null))
+    }
+
+    private fun traceMatch(token: Token, match: TokenMatch) {
+        traceEvents?.add(TokenMatchingEvent(token, match.offset, match))
     }
 }
