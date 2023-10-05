@@ -2,6 +2,7 @@ package me.alllex.parsus
 
 import assertk.assertions.isEqualTo
 import me.alllex.parsus.parser.*
+import me.alllex.parsus.token.EofToken
 import me.alllex.parsus.token.TokenMatch
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.regexToken
@@ -25,13 +26,30 @@ class TokenTests {
     @Test
     fun tokenPriorityIsDrivenByParser() {
         object : Grammar<TokenMatch>() {
+            // double declared first
+            val double by literalToken("<<")
+            val single by literalToken("<")
+            override val root by double or single
+        }.run {
+            assertParsed("<<").isEqualTo(TokenMatch(double, 0, 2))
+        }
+
+        object : Grammar<TokenMatch>() {
             val single by literalToken("<")
             val double by literalToken("<<")
-
             // even though single token is declared first, it is not matched first
             override val root by double or single
         }.run {
             assertParsed("<<").isEqualTo(TokenMatch(double, 0, 2))
+        }
+
+        object : Grammar<TokenMatch>() {
+            val single by literalToken("<")
+            val double by literalToken("<<")
+            // if the order in the parser is "wrong", then the parsing will fail too
+            override val root by single or double
+        }.run {
+            assertNotParsed("<<").failedWithUnmatchedToken(EofToken, 1)
         }
     }
 
