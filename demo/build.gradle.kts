@@ -1,23 +1,28 @@
-import buildsrc.utils.nativeTarget
+import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 
 plugins {
-    buildsrc.conventions.`kotlin-multiplatform-base`
+    kotlin("multiplatform") version "1.9.10"
+}
+
+repositories {
+    mavenCentral()
 }
 
 kotlin {
     jvm()
-
-    js(IR) {
-        browser()
-        nodejs()
-    }
-
-    nativeTarget()
+    jvmToolchain(8)
+//
+//    js(IR) {
+//        browser()
+//        nodejs()
+//    }
+//
+//    nativeTarget()
 
     sourceSets {
         commonMain {
             dependencies {
-                implementation(projects.parsus)
+//                implementation("me.alllex.parsus:parsus")
             }
         }
 
@@ -27,8 +32,13 @@ kotlin {
             }
         }
     }
-}
 
-repositories {
-    mavenCentral()
+    // configure all Kotlin/JVM Tests to use JUnitPlatform
+    targets.withType<KotlinJvmTarget>().configureEach {
+        testRuns.configureEach {
+            executionTask.configure {
+                useJUnitPlatform()
+            }
+        }
+    }
 }

@@ -11,14 +11,14 @@ plugins {
 kotlin {
     jvmToolchain(8)
 
-    targets.configureEach {
-        compilations.configureEach {
-            kotlinOptions {
-                apiVersion = "1.7"
-                languageVersion = "1.7"
-            }
-        }
-    }
+//    targets.configureEach {
+//        compilations.configureEach {
+//            kotlinOptions {
+//                apiVersion = "1.7"
+//                languageVersion = "1.7"
+//            }
+//        }
+//    }
 
     // configure all Kotlin/JVM Tests to use JUnitPlatform
     targets.withType<KotlinJvmTarget>().configureEach {

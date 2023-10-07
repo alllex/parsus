@@ -16,6 +16,6 @@ gradleEnterprise {
 
 rootProject.name = "parsus"
 
-include(":demo", ":benchmarks")
+//include(":demo", ":benchmarks")
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
