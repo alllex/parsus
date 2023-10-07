@@ -20,6 +20,8 @@ internal class ParsingContext(
     private val debugMode: Boolean = false
 ) : ParsingScope {
 
+    private val inputLength = tokenizer.input.length
+
     private var backtrackCont: Continuation<ParseError>? = null
     private var cont: Continuation<Any?>? = null
     private var position: Int = 0
@@ -63,10 +65,10 @@ internal class ParsingContext(
         val match = tokenizer.findMatchOf(fromIndex, token)
             ?: return UnmatchedToken(token, fromIndex, getParseErrorContextProviderOrNull())
 
-        // TODO: clean up, as this should not happen anymore
+        // This can only happen with EagerTokenizer
         if (match.token != token) return MismatchedToken(token, match, getParseErrorContextProviderOrNull())
 
-        val newPosition = match.nextOffset
+        val newPosition = match.nextOffset.coerceAtMost(inputLength)
         this.position = newPosition
         this.lastTokenMatchContext.currentOffset = newPosition
         this.lastTokenMatchContext.lastMatch = match
