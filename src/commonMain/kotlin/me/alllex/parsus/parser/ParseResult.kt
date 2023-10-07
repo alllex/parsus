@@ -24,9 +24,28 @@ abstract class ParseError : ParseResult<Nothing>() {
      */
     abstract val offset: Int
 
+    open val contextProvider: ParseErrorContextProvider? get() = null
+
     abstract fun describe(): String
 
     override fun toString(): String = describe()
+
+    protected fun format(message: String, messageAtOffset: String): String = buildString {
+        append(message)
+        contextProvider?.getParseErrorContext(offset)?.run {
+            appendLine()
+            append(" ".repeat(lookBehind)).append(messageAtOffset)
+            appendLine()
+            append(" ".repeat(lookBehind)).append("| (or after ignored tokens)")
+            appendLine()
+            appendLine(replaceNonPrintable(inputSection))
+            if (previousTokenMatch != null) {
+                append("^".repeat(previousTokenMatch.length.coerceAtLeast(1)))
+                append(" Previous token: ${previousTokenMatch.token} at offset=${previousTokenMatch.offset}")
+                appendLine()
+            }
+        }
+    }
 }
 
 data class ParseErrorContext(
@@ -43,27 +62,13 @@ fun interface ParseErrorContextProvider {
 data class UnmatchedToken(
     val expected: Token,
     override val offset: Int,
-    val contextProvider: ParseErrorContextProvider? = null
+    override val contextProvider: ParseErrorContextProvider? = null
 ) : ParseError() {
 
-    override fun describe(): String = format()
-
-    private fun format(): String = buildString {
-        append("Unmatched token at offset=$offset, when expected: $expected")
-        contextProvider?.getParseErrorContext(offset)?.run {
-            appendLine()
-            append(" ".repeat(lookBehind)).append("Expected token: $expected at offset=$offset (or after ignored tokens)")
-            appendLine()
-            append(" ".repeat(lookBehind)).append("|")
-            appendLine()
-            appendLine(replaceNonPrintable(inputSection))
-            if (previousTokenMatch != null) {
-                append("^".repeat(previousTokenMatch.length.coerceAtLeast(1)))
-                append(" Previous token: ${previousTokenMatch.token} at offset=${previousTokenMatch.offset}")
-                appendLine()
-            }
-        }
-    }
+    override fun describe(): String = format(
+        message = "Unmatched token at offset=$offset, when expected: $expected",
+        messageAtOffset = "Expected token: $expected at offset=$offset"
+    )
 }
 
 data class MismatchedToken(val expected: Token, val found: TokenMatch) : ParseError() {

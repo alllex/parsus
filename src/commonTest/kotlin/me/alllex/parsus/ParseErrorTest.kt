@@ -24,8 +24,8 @@ class ParseErrorTest {
 
             assertNotParsed("abab").prop(ParseError::describe).isEqualTo(
                 "Unmatched token at offset=2, when expected: LiteralToken('cd')\n" + """
-                      Expected token: LiteralToken('cd') at offset=2 (or after ignored tokens)
-                      |
+                      Expected token: LiteralToken('cd') at offset=2
+                      | (or after ignored tokens)
                     abab
                     ^^ Previous token: LiteralToken('ab') at offset=0
                 """.trimIndent() + "\n"
@@ -33,16 +33,16 @@ class ParseErrorTest {
 
             assertNotParsed("cd").prop(ParseError::describe).isEqualTo(
                 "Unmatched token at offset=0, when expected: LiteralToken('ab')\n" + """
-                    Expected token: LiteralToken('ab') at offset=0 (or after ignored tokens)
-                    |
+                    Expected token: LiteralToken('ab') at offset=0
+                    | (or after ignored tokens)
                     cd
                 """.trimIndent() + "\n"
             )
 
             assertNotParsed("abcdab").prop(ParseError::describe).isEqualTo(
                 "Unmatched token at offset=4, when expected: Token(EOF)\n" + """
-                      Expected token: Token(EOF) at offset=4 (or after ignored tokens)
-                      |
+                      Expected token: Token(EOF) at offset=4
+                      | (or after ignored tokens)
                     cdab
                     ^^ Previous token: LiteralToken('cd') at offset=2
                 """.trimIndent() + "\n"
@@ -62,8 +62,8 @@ class ParseErrorTest {
 
             assertNotParsed("ab ab").prop(ParseError::describe).isEqualTo(
                 "Unmatched token at offset=2, when expected: LiteralToken('cd')\n" + """
-                      Expected token: LiteralToken('cd') at offset=2 (or after ignored tokens)
-                      |
+                      Expected token: LiteralToken('cd') at offset=2
+                      | (or after ignored tokens)
                     ab␣ab
                     ^^ Previous token: LiteralToken('ab') at offset=0
                 """.trimIndent() + "\n"
@@ -84,8 +84,8 @@ class ParseErrorTest {
 
             assertNotParsed(" \t\r\ncd").prop(ParseError::describe).isEqualTo(
                 "Unmatched token at offset=4, when expected: LiteralToken('ab')\n" + """
-                        Expected token: LiteralToken('ab') at offset=4 (or after ignored tokens)
-                        |
+                        Expected token: LiteralToken('ab') at offset=4
+                        | (or after ignored tokens)
                     ␣␉␍␤cd
                     ^^^^ Previous token: RegexToken(ws [\s+]) at offset=0
                 """.trimIndent() + "\n"
