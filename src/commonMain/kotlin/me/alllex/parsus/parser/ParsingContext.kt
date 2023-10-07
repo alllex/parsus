@@ -182,6 +182,8 @@ internal class LastTokenMatchContext(
     var lastMatch: TokenMatch? = null,
 ) : ParseErrorContextProvider {
 
+    override fun toString() = "LastTokenMatchContext(currentOffset=$currentOffset, lastMatch=$lastMatch)"
+
     override fun getParseErrorContext(offset: Int): ParseErrorContext? {
         if (offset != currentOffset) {
             return null
