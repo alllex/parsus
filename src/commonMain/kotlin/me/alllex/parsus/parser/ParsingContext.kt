@@ -42,6 +42,7 @@ internal class ParsingContext(
 
     override val currentOffset: Int get() = position
 
+    @Deprecated("The new \"scannerless\" parsing approach does not eagerly tokenize the input. The `currentToken` is always null.")
     override val currentToken: TokenMatch?
         get() = tokenizer.findContextFreeMatch(position)
 
