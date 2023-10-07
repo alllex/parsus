@@ -64,7 +64,7 @@ internal class ParsingContext(
             ?: return UnmatchedToken(token, fromIndex, getParseErrorContextProviderOrNull())
 
         // TODO: clean up, as this should not happen anymore
-        if (match.token != token) return MismatchedToken(token, match)
+        if (match.token != token) return MismatchedToken(token, match, getParseErrorContextProviderOrNull())
 
         val newPosition = match.nextOffset
         this.position = newPosition

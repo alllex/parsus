@@ -36,7 +36,7 @@ abstract class ParseError : ParseResult<Nothing>() {
             appendLine()
             append(" ".repeat(lookBehind)).append(messageAtOffset)
             appendLine()
-            append(" ".repeat(lookBehind)).append("| (or after ignored tokens)")
+            append(" ".repeat(lookBehind)).append("| offset=$offset (or after ignored tokens)")
             appendLine()
             appendLine(replaceNonPrintable(inputSection))
             if (previousTokenMatch != null) {
@@ -67,19 +67,37 @@ data class UnmatchedToken(
 
     override fun describe(): String = format(
         message = "Unmatched token at offset=$offset, when expected: $expected",
-        messageAtOffset = "Expected token: $expected at offset=$offset"
+        messageAtOffset = "Expected token: $expected"
     )
 }
 
-data class MismatchedToken(val expected: Token, val found: TokenMatch) : ParseError() {
+data class MismatchedToken(
+    val expected: Token,
+    val found: TokenMatch,
+    override val contextProvider: ParseErrorContextProvider? = null,
+) : ParseError() {
     override val offset: Int get() = found.offset
-    override fun describe(): String = "Expected $expected, found $found"
+    override fun describe(): String = format(
+        message = "Mismatched token at offset=$offset, when expected: $expected, got: ${found.token}",
+        messageAtOffset = "Expected token: $expected at offset=$offset, got: ${found.token}"
+    )
 }
-data class NoMatchingToken(override val offset: Int) : ParseError() {
-    override fun describe(): String = "No matching token"
+
+data class NoMatchingToken(
+    override val offset: Int,
+) : ParseError() {
+    override fun describe(): String = format(
+        message = "No matching token at offset=$offset",
+        messageAtOffset = "No matching token"
+    )
 }
-data class NoViableAlternative(override val offset: Int) : ParseError() {
-    override fun describe(): String = "No viable alternative"
+data class NoViableAlternative(
+    override val offset: Int,
+) : ParseError() {
+    override fun describe(): String = format(
+        message = "None of the alternatives succeeded at offset=$offset",
+        messageAtOffset = "None of the alternatives succeeded"
+    )
 }
 data class NotEnoughRepetition(override val offset: Int, val expectedAtLeast: Int, val actualCount: Int) : ParseError() {
     override fun describe(): String = "Expected at least $expectedAtLeast, found $actualCount"
