@@ -8,4 +8,9 @@ data class TokenMatch(
     val token: Token,
     val offset: Int,
     val length: Int,
-)
+) {
+    /**
+     * Offset of the next character after the match.
+     */
+    val nextOffset: Int get() = offset + length
+}

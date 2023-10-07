@@ -83,4 +83,19 @@ class TokenTests {
         }
     }
 
+    @Test
+    fun explicitEofMatchesDoNotOverflowInputLength() {
+        object : Grammar<List<TokenMatch>>() {
+            val ab by literalToken("ab")
+            val eof by EofToken
+            override val root by ab * eof * eof map { it.toList() }
+        }.run {
+            assertParsed("ab").isEqualTo(listOf(
+                TokenMatch(ab, 0, 2),
+                TokenMatch(EofToken, 2, 1),
+                TokenMatch(EofToken, 2, 1),
+            ))
+        }
+    }
+
 }

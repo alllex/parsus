@@ -3,6 +3,7 @@ package me.alllex.parsus.trace
 import me.alllex.parsus.annotations.ExperimentalParsusApi
 import me.alllex.parsus.token.Token
 import me.alllex.parsus.token.TokenMatch
+import me.alllex.parsus.util.replaceNonPrintable
 
 
 @ExperimentalParsusApi
@@ -81,14 +82,4 @@ fun formatTokenMatchingTrace(
         sb.appendLine()
     }
     return sb.toString()
-}
-
-private fun replaceNonPrintable(char: Char): Char {
-    return when (char) {
-        ' ' -> '␣' // U+2423 OPEN BOX
-        '\n' -> '␤' // U+2424 SYMBOL FOR NEWLINE
-        '\r' -> '␍' // U+240D SYMBOL FOR CARRIAGE RETURN
-        '\t' -> '␉' // U+2409 SYMBOL FOR HORIZONTAL TABULATION
-        else -> char
-    }
 }

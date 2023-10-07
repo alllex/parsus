@@ -20,9 +20,12 @@ internal class ParsingContext(
     private val debugMode: Boolean = false
 ) : ParsingScope {
 
+    private val inputLength = tokenizer.input.length
+
     private var backtrackCont: Continuation<ParseError>? = null
     private var cont: Continuation<Any?>? = null
     private var position: Int = 0
+    private var lastTokenMatchContext = LastTokenMatchContext(tokenizer.input, currentOffset = 0)
     private var result: Result<Any?> = PENDING_RESULT
 
     fun <T> runParser(parser: Parser<T>): ParseResult<T> {
@@ -60,11 +63,21 @@ internal class ParsingContext(
     override fun tryParse(token: Token): ParseResult<TokenMatch> {
         val fromIndex = this.position
         val match = tokenizer.findMatchOf(fromIndex, token)
-            ?: return UnmatchedToken(token, fromIndex)
-        // TODO: clean up, as this should not happen anymore
-        if (match.token != token) return MismatchedToken(token, match)
-        this.position = match.offset + match.length
+            ?: return UnmatchedToken(token, fromIndex, getParseErrorContextProviderOrNull())
+
+        // This can only happen with EagerTokenizer
+        if (match.token != token) return MismatchedToken(token, match, getParseErrorContextProviderOrNull())
+
+        val newPosition = match.nextOffset.coerceAtMost(inputLength)
+        this.position = newPosition
+        this.lastTokenMatchContext.currentOffset = newPosition
+        this.lastTokenMatchContext.lastMatch = match
+
         return ParsedValue(match)
+    }
+
+    private fun getParseErrorContextProviderOrNull(): ParseErrorContextProvider {
+        return this.lastTokenMatchContext
     }
 
     override suspend fun fail(error: ParseError): Nothing {
@@ -163,4 +176,40 @@ internal class ParsingContext(
             }
         }
     }
+}
+
+internal class LastTokenMatchContext(
+    val input: String,
+    var currentOffset: Int,
+    var lastMatch: TokenMatch? = null,
+) : ParseErrorContextProvider {
+
+    override fun toString() = "LastTokenMatchContext(currentOffset=$currentOffset, lastMatch=$lastMatch)"
+
+    override fun getParseErrorContext(offset: Int): ParseErrorContext? {
+        if (offset != currentOffset) {
+            return null
+        }
+
+        val lastMatch = this.lastMatch
+        val lookAhead = 20
+        return if (lastMatch == null || lastMatch.nextOffset != offset) {
+            ParseErrorContext(
+                inputSection = getInputSection(offset, offset + lookAhead),
+                lookBehind = 0,
+                lookAhead = lookAhead,
+                previousTokenMatch = null
+            )
+        } else {
+            ParseErrorContext(
+                inputSection = getInputSection(lastMatch.offset, lastMatch.nextOffset + lookAhead),
+                lookBehind = lastMatch.length,
+                lookAhead = lookAhead,
+                previousTokenMatch = lastMatch
+            )
+        }
+    }
+
+    private fun getInputSection(inputSectionStart: Int, inputSectionStop: Int) =
+        input.substring(inputSectionStart, inputSectionStop.coerceAtMost(input.length))
 }
