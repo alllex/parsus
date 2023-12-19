@@ -68,9 +68,9 @@ suspend fun <T : Any> ParsingScope.split(
 
     val values = mutableListOf<T>()
     values += if (!allowEmpty) term() else poll(term) ?: return emptyList()
-    while (true) {
-        poll(separator) ?: break
-        values += if (!trailingSeparator) term() else (poll(term) ?: break)
+    values += repeat(ignored(separator) * term, atLeast = 0)
+    if (trailingSeparator) {
+        poll(separator)
     }
     return values
 }

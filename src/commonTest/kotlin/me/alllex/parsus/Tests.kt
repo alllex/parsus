@@ -435,6 +435,29 @@ class Tests {
             assertParsed("a,a").isEqualTo(node(a.lex(0), a.lex(2)))
             assertParsed("a,a,").isEqualTo(node(a.lex(0), a.lex(2)))
         }
+
+        object : Grammar<SyntaxTree>() {
+            val com by literalToken(",")
+            val a by literalToken("a")
+            val b by literalToken("b")
+            val ap by parser { lexeme(a) }
+            val bp by parser { lexeme(b) }
+            override val root by separated(ap, com) * -com * bp map { (a, b) -> node(a + b) }
+        }.run {
+            assertParsed("a,b").isEqualTo(node(a.lex(0), b.lex(2)))
+            assertParsed("a,a,b").isEqualTo(node(a.lex(0), a.lex(2), b.lex(4)))
+        }
+
+        object : Grammar<SyntaxTree>() {
+            val com by literalToken(",")
+            val a by literalToken("a")
+            val b by literalToken("b")
+            val ap by parser { lexeme(a) }
+            val bp by parser { lexeme(b) }
+            override val root by separated(ap, com, trailingSeparator = true) * -com * bp map { (a, b) -> node(a + b) }
+        }.run {
+            assertParsed("a,,b").isEqualTo(node(a.lex(0), b.lex(3)))
+        }
     }
 
 }
