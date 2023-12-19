@@ -3,6 +3,7 @@ package me.alllex.parsus.parser
 import me.alllex.parsus.token.Token
 import me.alllex.parsus.token.TokenMatch
 import me.alllex.parsus.util.replaceNonPrintable
+import me.alllex.parsus.util.toPrintableString
 
 /**
  * Result of a parse that is either a [parsed value][ParsedValue]
@@ -36,17 +37,20 @@ abstract class ParseError : ParseResult<Nothing>() {
             appendLine()
             append(" ".repeat(lookBehind)).append(messageAtOffset)
             appendLine()
-            append(" ".repeat(lookBehind)).append("| offset=$offset (or after ignored tokens)")
+            append(" ".repeat(lookBehind)).append("$arrowDown offset=$offset (or after ignored tokens)")
             appendLine()
             appendLine(replaceNonPrintable(inputSection))
             if (previousTokenMatch != null) {
-                append("^".repeat(previousTokenMatch.length.coerceAtLeast(1)))
+                append(arrowUp.repeat(previousTokenMatch.length.coerceAtLeast(1)))
                 append(" Previous token: ${previousTokenMatch.token} at offset=${previousTokenMatch.offset}")
                 appendLine()
             }
         }
     }
 }
+
+private const val arrowDown = "\u2193"
+private const val arrowUp = "\u2191"
 
 data class ParseErrorContext(
     val inputSection: String,
@@ -68,8 +72,8 @@ data class UnmatchedToken(
     override fun toString(): String = describe()
 
     override fun describe(): String = format(
-        message = "Unmatched token at offset=$offset, when expected: $expected",
-        messageAtOffset = "Expected token: $expected"
+        message = "Unmatched token at offset=$offset, when expected: ${expected.toPrintableString()}",
+        messageAtOffset = "Expected token: ${expected.toPrintableString()}"
     )
 }
 
@@ -81,8 +85,8 @@ data class MismatchedToken(
     override val offset: Int get() = found.offset
     override fun toString(): String = describe()
     override fun describe(): String = format(
-        message = "Mismatched token at offset=$offset, when expected: $expected, got: ${found.token}",
-        messageAtOffset = "Expected token: $expected at offset=$offset, got: ${found.token}"
+        message = "Mismatched token at offset=$offset, when expected: ${expected.toPrintableString()}, got: ${found.token.toPrintableString()}",
+        messageAtOffset = "Expected token: ${expected.toPrintableString()} at offset=$offset, got: ${found.token.toPrintableString()}"
     )
 }
 
@@ -107,7 +111,11 @@ data class NoViableAlternative(
     )
 }
 
-data class NotEnoughRepetition(override val offset: Int, val expectedAtLeast: Int, val actualCount: Int) : ParseError() {
+data class NotEnoughRepetition(
+    override val offset: Int,
+    val expectedAtLeast: Int,
+    val actualCount: Int
+) : ParseError() {
     override fun toString(): String = describe()
     override fun describe(): String = "Expected at least $expectedAtLeast, found $actualCount"
 }

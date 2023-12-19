@@ -1,5 +1,7 @@
 package me.alllex.parsus.util
 
+internal fun Any.toPrintableString() = replaceNonPrintable(toString())
+
 internal fun replaceNonPrintable(string: String): String {
     return buildString {
         for (char in string) {
