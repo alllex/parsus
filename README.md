@@ -40,7 +40,7 @@ val ast = booleanGrammar.parse("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a").ge
 
 ```kotlin
 dependencies {
-    implementation("me.alllex.parsus:parsus-jvm:0.6.0")
+    implementation("me.alllex.parsus:parsus-jvm:0.6.1")
 }
 ```
 
@@ -54,7 +54,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("me.alllex.parsus:parsus:0.6.0")
+                implementation("me.alllex.parsus:parsus:0.6.1")
             }
         }
     }
@@ -71,7 +71,7 @@ kotlin {
 <dependency>
   <groupId>me.alllex.parsus</groupId>
   <artifactId>parsus-jvm</artifactId>
-  <version>0.6.0</version>
+  <version>0.6.1</version>
 </dependency>
 ```
 
