@@ -131,7 +131,7 @@ It is just a few lines of declarative code, but there a lot going on under the h
 ### Grammars
 
 First, there is the `Grammar` class that needs to be extended in order to define you custom grammar. In the example
-above an anonymous class is declared, but it could just as well a normal class.
+above an anonymous class is declared, but it could just as well be a normal class.
 
 ```kotlin
 class MyClass : Grammar<MyResult>() {
