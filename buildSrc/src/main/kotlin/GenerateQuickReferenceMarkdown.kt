@@ -26,14 +26,14 @@ abstract class GenerateQuickReferenceMarkdown : DefaultTask() {
             for (entry in entries) {
                 append("| ")
                 append(entry.description)
-                append("<br/>")
-                append("<br/>")
+                append("&#13;")
+                append("&#13;")
                 append("Parses: ")
                 append(entry.testCases.joinToString(", ") { "`$it`" })
                 append(" | ")
-                append("Procedural:<br/>")
+                append("Procedural:&#13;")
                 append(entry.proceduralGrammar.toMultilineMarkdownCodeBlock())
-                append("Combinator:<br/>")
+                append("Combinator:&#13;")
                 append(entry.combinatorGrammar.toMultilineMarkdownCodeBlock())
                 appendLine(" |")
             }
@@ -42,7 +42,7 @@ abstract class GenerateQuickReferenceMarkdown : DefaultTask() {
 
     private fun List<String>.toMultilineMarkdownCodeBlock(): String {
         // TODO: syntax highlight
-        return joinToString("<br/>", prefix = "<pre>", postfix = "</pre>")
+        return joinToString("&#13;", prefix = "<pre lang=\"kotlin\">", postfix = "</pre>")
     }
 
     private data class QuickRefEntry(
