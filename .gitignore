@@ -3,6 +3,9 @@
 .gradle
 build
 
+# Kotlin
+.kotlin
+
 # IDEA
 .idea
 *.iml
