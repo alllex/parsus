@@ -14,15 +14,26 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                compileOnly("org.jetbrains:annotations:26.0.1") {
-                    because("multiplatform @Language annotation")
-                }
+                // Support for multiplatform @Language annotation
+                compileOnly(libs.annotations)
+            }
+        }
+        nativeMain {
+            dependencies {
+                // Required, because compileOnly dependencies are not supported on Kotlin/Native
+                api(libs.annotations)
+            }
+        }
+        jsMain {
+            dependencies {
+                // Required, because compileOnly dependencies are not supported on Kotlin/JS
+                api(libs.annotations)
             }
         }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("com.willowtreeapps.assertk:assertk:0.26.1")
+                implementation(libs.assertk)
                 runtimeOnly(kotlin("reflect"))
             }
         }
