@@ -12,6 +12,13 @@ version = publishVersion
 
 kotlin {
     sourceSets {
+        commonMain {
+            dependencies {
+                compileOnly("org.jetbrains:annotations:26.0.1") {
+                    because("multiplatform @Language annotation")
+                }
+            }
+        }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))

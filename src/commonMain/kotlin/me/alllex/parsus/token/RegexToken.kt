@@ -35,7 +35,7 @@ private fun Regex.withIgnoreCase(ignoreCase: Boolean) =
  * This token defined by a regular expression [pattern] that is expected to match the input.
  */
 fun Grammar<*>.regexToken(
-    @Language("RegExp", "", "")
+    @Language("RegExp")
     pattern: String,
     name: String? = null,
     ignored: Boolean = false,
