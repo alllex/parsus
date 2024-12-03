@@ -1,17 +1,13 @@
 plugins {
-    id("com.gradle.enterprise") version "3.14.1"
+    id("com.gradle.develocity") version "3.18.2"
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.6.0"
 }
 
-gradleEnterprise {
-    buildScan {
-        termsOfServiceUrl = "https://gradle.com/terms-of-service"
-        termsOfServiceAgree = "yes"
-        if (settings.providers.environmentVariable("CI").orNull != null) {
-            publishAlways()
-            tag("CI")
-        }
-    }
+develocity {
+    buildScan.termsOfUseUrl = "https://gradle.com/terms-of-service"
+    buildScan.termsOfUseAgree = "yes"
+    val ci = providers.environmentVariable("CI").orNull != null
+    buildScan.publishing { onlyIf { ci } }
 }
 
 rootProject.name = "parsus"
