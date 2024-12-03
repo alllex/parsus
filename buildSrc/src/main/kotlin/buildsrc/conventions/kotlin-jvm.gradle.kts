@@ -1,17 +1,20 @@
 package buildsrc.conventions
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     kotlin("jvm")
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions.languageVersion = "1.7"
-    kotlinOptions.apiVersion = "1.7"
+kotlin {
+    compilerOptions {
+        languageVersion = KotlinVersion.KOTLIN_1_7
+        apiVersion = KotlinVersion.KOTLIN_1_7
+    }
 }
 
-tasks.withType<Test>().configureEach {
+tasks.test {
     useJUnitPlatform()
 }
 
