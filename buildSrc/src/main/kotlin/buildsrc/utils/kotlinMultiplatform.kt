@@ -18,6 +18,7 @@ fun KotlinMultiplatformExtension.nativeTarget(
 ): KotlinNativeTargetWithHostTests {
     return when (currentHost) {
         KonanTarget.LINUX_X64 -> linuxX64(name, configure)
+        KonanTarget.LINUX_ARM64 -> linuxX64(name, configure)
         KonanTarget.MACOS_X64 -> macosX64(name, configure)
         KonanTarget.MACOS_ARM64 -> macosArm64(name, configure)
         KonanTarget.MINGW_X64 -> mingwX64(name, configure)
