@@ -12,7 +12,7 @@ import org.jetbrains.kotlin.konan.target.KonanTarget
  * configured to extend the `commonMain` and `commonTest` source sets.
  */
 fun KotlinMultiplatformExtension.nativeTarget(
-    name: String = "native",
+    name: String = "localNative",
     currentHost: KonanTarget = HostManager.host,
     configure: KotlinNativeTargetWithHostTests.() -> Unit = { },
 ): KotlinNativeTargetWithHostTests {
