@@ -4,10 +4,13 @@ plugins {
 }
 
 develocity {
-    buildScan.termsOfUseUrl = "https://gradle.com/terms-of-service"
-    buildScan.termsOfUseAgree = "yes"
-    val ci = providers.environmentVariable("CI").orNull != null
-    buildScan.publishing { onlyIf { ci } }
+    buildScan {
+        termsOfUseUrl = "https://gradle.com/terms-of-service"
+        termsOfUseAgree = "yes"
+        val ci = providers.environmentVariable("CI").orNull != null
+        publishing { onlyIf { ci } }
+        obfuscation { externalProcessName { "non-build-process" } }
+    }
 }
 
 rootProject.name = "parsus"
