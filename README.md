@@ -40,7 +40,7 @@ val ast = booleanGrammar.parse("a & (b1 -> c1) | a1 & !b | !(a1 -> a2) -> a").ge
 
 ```kotlin
 dependencies {
-    implementation("me.alllex.parsus:parsus-jvm:0.6.1")
+    implementation("me.alllex.parsus:parsus:0.6.1")
 }
 ```
 
@@ -74,6 +74,11 @@ kotlin {
   <version>0.6.1</version>
 </dependency>
 ```
+
+> ℹ️ The Parsus artifact ID must have a `-jvm` suffix when using Maven.
+> 
+> Parsus is a Kotlin Multiplatform library with multiple targets, and Maven only supports JVM targets, and needs the `-jvm` suffix to select the Kotlin/JVM artifact.
+> (Gradle can automatically select the correct target, and does not require a suffix.)
 
 </details>
 
