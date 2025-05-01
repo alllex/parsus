@@ -30,6 +30,12 @@ kotlin {
                 api(libs.annotations)
             }
         }
+        wasmJsMain {
+            dependencies {
+                // Required, because compileOnly dependencies are not supported on Kotlin/Wasm
+                api(libs.annotations)
+            }
+        }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))

@@ -13,6 +13,10 @@ kotlin {
         browser()
         nodejs()
     }
+    wasmJs {
+        browser()
+        nodejs()
+    }
 
     linuxX64()
     linuxArm64()
