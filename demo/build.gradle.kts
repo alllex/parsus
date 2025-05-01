@@ -11,6 +11,10 @@ kotlin {
         browser()
         nodejs()
     }
+    wasmJs {
+        browser()
+        nodejs()
+    }
 
     nativeTarget()
 
