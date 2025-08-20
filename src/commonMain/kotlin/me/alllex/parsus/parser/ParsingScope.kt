@@ -25,7 +25,7 @@ interface ParsingScope {
      * If this or any underlying parser fails, execution is continued here
      * with a wrapped [error][ParseError].
      */
-    suspend fun <R> tryParse(p: Parser<R>): ParseResult<R>
+    fun <R> tryParse(p: Parser<R>): ParseResult<R>
 
     /**
      * Tries to parse given [token] at the current position in the input.

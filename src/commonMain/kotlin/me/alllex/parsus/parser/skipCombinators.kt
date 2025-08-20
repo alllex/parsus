@@ -57,12 +57,12 @@ fun <T : Any> optional(parser: Parser<T>): Parser<T?> = parser {
 /**
  * Runs the [parser] and returns its result or null in case of failure.
  */
-suspend fun <R : Any> ParsingScope.tryOrNull(parser: Parser<R>): R? = tryParse(parser).getOrElse { null }
+fun <R : Any> ParsingScope.tryOrNull(parser: Parser<R>): R? = tryParse(parser).getOrElse { null }
 
 /**
  * Runs the [parser] and returns its result or null in case of failure.
  */
-suspend fun <R : Any> ParsingScope.poll(parser: Parser<R>): R? = tryOrNull(parser)
+fun <R : Any> ParsingScope.poll(parser: Parser<R>): R? = tryOrNull(parser)
 
 /**
  * Executes given parser, ignoring the result.
