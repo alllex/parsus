@@ -1,5 +1,3 @@
-import buildsrc.utils.nativeTarget
-
 plugins {
     buildsrc.conventions.`kotlin-multiplatform-base`
 }
@@ -12,7 +10,8 @@ kotlin {
         nodejs()
     }
 
-    nativeTarget()
+    // TODO: fix demo for native targets
+    // nativeTarget()
 
     sourceSets {
         commonMain {

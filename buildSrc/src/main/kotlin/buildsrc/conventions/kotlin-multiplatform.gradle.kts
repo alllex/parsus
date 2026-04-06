@@ -19,9 +19,10 @@ kotlin {
 
     mingwX64()
 
-    macosX64()
-    macosArm64()
+    // TODO: fix build for Apple-related targets
+//    macosX64()
+//    macosArm64()
 
-    iosX64()
-    iosArm64()
+//    iosX64()
+//    iosArm64()
 }
