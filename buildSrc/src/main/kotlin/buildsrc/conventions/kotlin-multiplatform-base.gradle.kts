@@ -1,7 +1,6 @@
 package buildsrc.conventions
 
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 /** Base configuration for all Kotlin/Multiplatform projects */
 
@@ -9,13 +8,15 @@ plugins {
     kotlin("multiplatform")
 }
 
+private val libs = versionCatalogs.named("libs")
+
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(libs.jvmToolchainVersion)
 
     kotlin {
         compilerOptions {
-            languageVersion = KotlinVersion.KOTLIN_2_1
-            apiVersion = KotlinVersion.KOTLIN_2_1
+            languageVersion = libs.targetKotlinVersion
+            apiVersion = libs.targetKotlinVersion
         }
     }
 

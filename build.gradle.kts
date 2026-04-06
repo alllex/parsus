@@ -1,7 +1,7 @@
 plugins {
     buildsrc.conventions.`kotlin-multiplatform`
     buildsrc.conventions.`maven-publishing`
-    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
+    alias(libs.plugins.nexus.publish)
     id("org.jetbrains.dokka")
 }
 

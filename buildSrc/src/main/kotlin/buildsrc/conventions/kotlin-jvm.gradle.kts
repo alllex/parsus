@@ -1,16 +1,15 @@
 package buildsrc.conventions
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-
 plugins {
     kotlin("jvm")
 }
 
+private val libs = versionCatalogs.named("libs")
+
 kotlin {
     compilerOptions {
-        languageVersion = KotlinVersion.KOTLIN_2_1
-        apiVersion = KotlinVersion.KOTLIN_2_1
+        languageVersion = libs.targetKotlinVersion
+        apiVersion = libs.targetKotlinVersion
     }
 }
 
@@ -19,5 +18,5 @@ tasks.test {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(libs.jvmToolchainVersion)
 }
