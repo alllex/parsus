@@ -9,8 +9,8 @@ plugins {
 
 kotlin {
     compilerOptions {
-        languageVersion = KotlinVersion.KOTLIN_1_7
-        apiVersion = KotlinVersion.KOTLIN_1_7
+        languageVersion = KotlinVersion.KOTLIN_2_1
+        apiVersion = KotlinVersion.KOTLIN_2_1
     }
 }
 
