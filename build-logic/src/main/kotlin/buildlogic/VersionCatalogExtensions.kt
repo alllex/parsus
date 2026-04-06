@@ -1,4 +1,4 @@
-package buildsrc.conventions
+package buildlogic
 
 import org.gradle.api.artifacts.VersionCatalog
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion

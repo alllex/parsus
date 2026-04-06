@@ -1,5 +1,5 @@
 plugins {
-    buildsrc.conventions.`kotlin-multiplatform-base`
+    id("parsus.kotlin-multiplatform-base")
 }
 
 kotlin {

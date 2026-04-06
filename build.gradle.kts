@@ -1,8 +1,10 @@
+import buildlogic.GenerateQuickReferenceMarkdown
+
 plugins {
-    buildsrc.conventions.`kotlin-multiplatform`
-    buildsrc.conventions.`maven-publishing`
+    id("parsus.kotlin-multiplatform")
+    id("parsus.maven-publishing")
     alias(libs.plugins.nexus.publish)
-    id("org.jetbrains.dokka")
+    alias(libs.plugins.dokka)
 }
 
 val publishVersion = project.layout.projectDirectory.file("version.txt").asFile.readText().trim()

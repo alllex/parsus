@@ -1,6 +1,6 @@
 plugins {
-    buildsrc.conventions.`kotlin-jvm`
-    kotlin("plugin.allopen")
+    id("parsus.kotlin-jvm")
+    id("org.jetbrains.kotlin.plugin.allopen")
     id("org.jetbrains.kotlinx.benchmark")
 }
 
