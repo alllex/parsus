@@ -3,8 +3,6 @@ import buildlogic.GenerateQuickReferenceMarkdown
 plugins {
     id("parsus.kotlin-multiplatform")
     id("parsus.maven-publishing")
-    alias(libs.plugins.nexus.publish)
-    alias(libs.plugins.dokka)
 }
 
 val publishVersion = project.layout.projectDirectory.file("version.txt").asFile.readText().trim()
@@ -28,34 +26,6 @@ repositories {
     mavenCentral()
 }
 
-val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
-    description = "Produce javadoc with Dokka HTML inside"
-    dependsOn(tasks.dokkaHtml)
-    from(tasks.dokkaHtml)
-    archiveClassifier = "javadoc"
-}
-
-// Without this there is a Gradle error (notice mismatch between publish task and sign names):
-// > Reason: Task ':publishIosArm64PublicationToMavenLocal' uses this output of task ':signIosX64Publication' without declaring an explicit or implicit dependency.
-tasks.withType<AbstractPublishToMaven>().configureEach {
-    mustRunAfter(tasks.withType<Sign>())
-}
-
-// Maven Central publication requires a javadoc jar
-publishing {
-    publications.withType<MavenPublication>().configureEach {
-        artifact(javadocJar)
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            nexusUrl = uri("https://s01.oss.sonatype.org/service/local/")
-            snapshotRepositoryUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-        }
-    }
-}
 
 tasks.register<GenerateQuickReferenceMarkdown>("generateQuickRef") {
     kotlinTestSource = project.layout.projectDirectory.file("src/commonTest/kotlin/me/alllex/parsus/ReadmeTests.kt")

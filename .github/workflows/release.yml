@@ -38,30 +38,30 @@ jobs:
 
       - name: Publish the shared and macOS artifacts
         if: matrix.os == 'macOS-latest'
-        run: ./gradlew :publishAllPublicationsToSonatypeRepository :closeSonatypeStagingRepository -x :publishMingwX64PublicationToSonatypeRepository -x :publishLinuxX64PublicationToSonatypeRepository --no-parallel
+        run: ./gradlew :publishAllPublicationsToMavenCentralRepository -x :publishMingwX64PublicationToMavenCentralRepository -x :publishLinuxX64PublicationToMavenCentralRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
           ORG_GRADLE_PROJECT_signingPassword: ${{secrets.SIGNING_PASSWORD}}
-          ORG_GRADLE_PROJECT_sonatypeUsername: ${{secrets.SONATYPE_USERNAME}}
-          ORG_GRADLE_PROJECT_sonatypePassword: ${{secrets.SONATYPE_PASSWORD}}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{secrets.SONATYPE_USERNAME}}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{secrets.SONATYPE_PASSWORD}}
 
       - name: Publish the windows artifact
         if: matrix.os == 'windows-latest'
-        run: ./gradlew :publishMingwX64PublicationToSonatypeRepository :closeSonatypeStagingRepository --no-parallel
+        run: ./gradlew :publishMingwX64PublicationToMavenCentralRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
           ORG_GRADLE_PROJECT_signingPassword: ${{secrets.SIGNING_PASSWORD}}
-          ORG_GRADLE_PROJECT_sonatypeUsername: ${{secrets.SONATYPE_USERNAME}}
-          ORG_GRADLE_PROJECT_sonatypePassword: ${{secrets.SONATYPE_PASSWORD}}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{secrets.SONATYPE_USERNAME}}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{secrets.SONATYPE_PASSWORD}}
 
       - name: Publish the linux artifact
         if: matrix.os == 'ubuntu-latest'
-        run: ./gradlew :publishLinuxX64PublicationToSonatypeRepository :closeSonatypeStagingRepository --no-parallel
+        run: ./gradlew :publishLinuxX64PublicationToMavenCentralRepository --no-parallel
         env:
           ORG_GRADLE_PROJECT_signingKeyId: ${{secrets.SIGNING_KEY_ID}}
           ORG_GRADLE_PROJECT_signingKey: ${{secrets.SIGNING_KEY}}
           ORG_GRADLE_PROJECT_signingPassword: ${{secrets.SIGNING_PASSWORD}}
-          ORG_GRADLE_PROJECT_sonatypeUsername: ${{secrets.SONATYPE_USERNAME}}
-          ORG_GRADLE_PROJECT_sonatypePassword: ${{secrets.SONATYPE_PASSWORD}}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{secrets.SONATYPE_USERNAME}}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{secrets.SONATYPE_PASSWORD}}
