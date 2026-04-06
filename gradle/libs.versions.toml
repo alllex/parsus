@@ -1,3 +1,2 @@
 [libraries]
-annotations = { group = "org.jetbrains", name = "annotations", version = "26.0.1" }
 assertk = { group = "com.willowtreeapps.assertk", name = "assertk", version = "0.26.1" }

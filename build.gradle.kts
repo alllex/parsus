@@ -12,24 +12,6 @@ version = publishVersion
 
 kotlin {
     sourceSets {
-        commonMain {
-            dependencies {
-                // Support for multiplatform @Language annotation
-                compileOnly(libs.annotations)
-            }
-        }
-        nativeMain {
-            dependencies {
-                // Required, because compileOnly dependencies are not supported on Kotlin/Native
-                api(libs.annotations)
-            }
-        }
-        jsMain {
-            dependencies {
-                // Required, because compileOnly dependencies are not supported on Kotlin/JS
-                api(libs.annotations)
-            }
-        }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
