@@ -39,10 +39,7 @@ interface GrammarContext
  * }
  * ```
  */
-abstract class Grammar<out V>(
-    val ignoreCase: Boolean = false,
-    private val debugMode: Boolean = false,
-) : GrammarContext {
+abstract class Grammar<out V>(val ignoreCase: Boolean = false) : GrammarContext {
 
     private val _tokens = mutableListOf<Token>()
     private var freezeTokens = false
@@ -162,7 +159,7 @@ abstract class Grammar<out V>(
         beforeParsing()
         // If tokenizer impl is changed to EagerTokenizer, then ChoiceParser impl has to be changed to EagerChoiceParser
         val tokenizer = ScannerlessTokenizer(input, _tokens)
-        val parsingContext = ParsingContext(tokenizer, debugMode)
+        val parsingContext = ParsingContext(tokenizer)
         return parsingContext.runParser(createUntilEofParser(parser))
     }
 
@@ -171,7 +168,7 @@ abstract class Grammar<out V>(
         beforeParsing()
         // If tokenizer impl is changed to EagerTokenizer, then ChoiceParser impl has to be changed to EagerChoiceParser
         val tokenizer = ScannerlessTokenizer(input, _tokens, traceTokenMatching = true)
-        val parsingContext = ParsingContext(tokenizer, debugMode)
+        val parsingContext = ParsingContext(tokenizer)
         val result = parsingContext.runParser(createUntilEofParser(parser))
         val trace = tokenizer.getTokenMatchingTrace() ?: error("Token matching trace is not available")
         return TracedParseResult(result, trace)
