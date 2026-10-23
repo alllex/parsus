@@ -120,6 +120,14 @@ data class NotEnoughRepetition(
     override fun describe(): String = "Expected at least $expectedAtLeast, found $actualCount"
 }
 
+/** A repeated parser succeeded without consuming input, so its loop could not make progress. */
+data class NonAdvancingRepetition(
+    override val offset: Int,
+) : ParseError() {
+    override fun toString(): String = describe()
+    override fun describe(): String = "Repeated parser succeeded without consuming input at offset=$offset"
+}
+
 class ParseException(val error: ParseError) : Exception() {
     override fun toString(): String = "ParseException: ${error.describe()}"
 }
