@@ -43,6 +43,10 @@ suspend fun <R : Any> ParsingScope.repeatOneOrMore(p: Parser<R>): List<R> = repe
 
 suspend fun <R : Any> ParsingScope.repeatZeroOrMore(p: Parser<R>): List<R> = repeat(p, atLeast = 0)
 
+/**
+ * Repeats [p] until it fails or [atMost] is reached. Unbounded repetition fails with
+ * [NonAdvancingRepetition] if a successful iteration does not consume input.
+ */
 suspend fun <R : Any> ParsingScope.repeat(p: Parser<R>, atLeast: Int, atMost: Int = -1): List<R> {
     require(atLeast >= 0) { "atLeast must not be negative" }
     require(atMost == -1 || atLeast <= atMost) { "atMost has invalid value" }
@@ -51,7 +55,12 @@ suspend fun <R : Any> ParsingScope.repeat(p: Parser<R>, atLeast: Int, atMost: In
     val results = mutableListOf<R>()
     var repetition = 0
     while (atMost == -1 || repetition < atMost) {
-        results += poll(p) ?: break
+        val iterationStart = currentOffset
+        val result = poll(p) ?: break
+        if (atMost == -1 && currentOffset == iterationStart) {
+            fail(NonAdvancingRepetition(iterationStart))
+        }
+        results += result
         repetition++
     }
 
@@ -82,8 +91,10 @@ suspend inline fun <T : Any, S : Any> ParsingScope.reduce(
 ): T {
     var l: T = term()
     while (true) {
+        val iterationStart = currentOffset
         val o = poll(operator) ?: break
         val r = term()
+        if (currentOffset == iterationStart) fail(NonAdvancingRepetition(iterationStart))
         l = transform(l, o, r)
     }
     return l
@@ -97,9 +108,11 @@ suspend inline fun <T : Any, S : Any> ParsingScope.reduceRight(
     val stack = mutableListOf<Pair<T, S>>()
     var t = term()
     while (true) {
+        val iterationStart = currentOffset
         val o = poll(operator) ?: break
         stack += t to o
         t = term()
+        if (currentOffset == iterationStart) fail(NonAdvancingRepetition(iterationStart))
     }
 
     for ((l, o) in stack.asReversed()) {
